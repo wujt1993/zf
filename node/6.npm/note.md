@@ -1,0 +1,13 @@
+- 包是由多个模块组成的 （在node中每个js都是一个模块）
+- npm init -y 初始化包的信息文件 ，json不能写注释
+- 包分为全局包和本地包，代码中使用的都是本地包 全局包只能在命令行中使用
+- nrm (node registry manager) 默认npm源 很慢
+- C:\Users\test1\AppData\Roaming\npm\nrm -> C:\Users\test1\AppData\Roaming\npm\node_modules\nrm\cli.js
+- npm之所以能够直接使用因为npm 放到了path目录，其他安装的全局包都在npm 下。所以可以直接当成全局命令来执行
+
+- npm link 把当前模块临时放到npm下 方便调试使用
+- 全局包必须增加bin字段 ，会通过配置做软链接 表示用node执行 #! /usr/bin/env node
+- 安装模块 （第三方模块） 依赖方式 1.开发依赖（webpack） 2）项目依赖（vue） 3）同版本依赖 4)捆绑依赖 5）可选依赖
+- 开发:npm install webpack -D
+- 项目:npm install jquery -S 新版本可以省略 npm install 默认会安装所有包 npm install --production 只安装生产环境下
+- 常见的版本号 (major,minor,patch) 正式版 ^2.0.0 必须以2开头不能低于当前版本 ~2.2.2 >= <= 1.0.0-2.0.0 npm install
