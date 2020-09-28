@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+</head>
+<body>
+    <input type="file" id="avatar">
+    <script>
+        function loadString() {
+            var string = "hello world";
+            let blob = new Blob([...string],{
+                type:'text/html'
+            })
+            var url = URL.createObjectURL(blob)
+            var a = document.createElement("a")
+            a.setAttribute("href",url);
+            a.setAttribute("download", "index.html")
+            a.click()
+        }
+
+        avatar.addEventListener("change", function(e){
+            let file = e.target.files[0];
+            let fileReader = new FileReader();
+            fileReader.onload = function () {
+                let img = document.createElement('img');
+                img.src = fileReader.result;
+                document.body.appendChild(img)
+            }
+            fileReader.readAsDataURL(file); // base64Url
+            
+        })
+        function loadImg(file) {
+            let url = URL.createObjectURL(file);
+            let img = document.createElement("img");
+            img.src = url
+            document.body.appendChild(img)
+        }
+    </script>
+</body>
+</html>
