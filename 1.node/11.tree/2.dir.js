@@ -59,10 +59,33 @@ function mkFiles(pathName, callback) {
 // })
 
 function readdirs(dirname) {
+    // console.log(dirname)
     fs.readdir(dirname, (err, files)=>{
         if(err) throw Error(err);
-        
+        if(files.length == 0) {
+            console.log(dirname);
+        }
+        files.map(item=>{
+            let filename = path.join(dirname,item);
+            fs.stat(filename,(err, stats)=>{
+                if(stats.isDirectory()){
+                    readdirs(filename)
+                }else {
+                    console.log(filename)
+                }
+            })
+        })
     })
 }
-
 readdirs(path.resolve(__dirname,"a"))
+
+//删除文件夹， 只能删除空的文件夹
+// fs.rmdir(path.resolve(__dirname, "dir"),(err)=>{
+//     if(err) throw Error(err)
+// })
+
+//删除文件
+// fs.unlink(path.resolve(__dirname, "dir/1.js"),(err)=>{
+//     if(err) throw Error(err)
+// })
+
