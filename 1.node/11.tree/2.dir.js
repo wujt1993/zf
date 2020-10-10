@@ -33,7 +33,7 @@ function mkdirs(pathName,callback) {
     }
 }
 
-// mkdirs(path.resolve(__dirname,"a/b/c/d/e"), ()=>{
+// mkdirs(path.resolve(__dirname,"a/b/b/d/e/1.js"), ()=>{
 //     console.log("创建成功")
 // })
 
@@ -77,7 +77,7 @@ function readdirs(dirname) {
         })
     })
 }
-readdirs(path.resolve(__dirname,"a"))
+// readdirs(path.resolve(__dirname,"a"))
 
 //删除文件夹， 只能删除空的文件夹
 // fs.rmdir(path.resolve(__dirname, "dir"),(err)=>{
@@ -89,3 +89,27 @@ readdirs(path.resolve(__dirname,"a"))
 //     if(err) throw Error(err)
 // })
 
+
+function rmdirs(dir,cb){ // 用我们的层序遍历来实现删除操作
+    fs.stat(dir,(err,statObj)=>{
+        if(statObj.isFile()){
+            fs.unlink(dir,cb);
+        }else{
+            // 读取文件夹中的内容 
+            fs.readdir(dir,(err,dirs)=>{
+                dirs = dirs.map(item=>path.join(dir,item));
+                let idx = 0;
+                function next(){
+                    if(idx == dirs.length) return fs.rmdir(dir,cb);
+                    let current = dirs[idx++];
+                    rmdirs(current,next)
+                }
+                next();
+            })
+        }
+    });
+}
+
+rmdirs(path.resolve(__dirname, "a"),()=>{
+    console.log("删除成功")
+})
