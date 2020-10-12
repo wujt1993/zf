@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zs</title>
+</head>
+<body>
+
+<!-- 出路路径 尽量不要采用./ ../  绝对路径 /a/a.js -->
+
+
+    <%dirs.forEach(item=>{%>
+        <li><a href="<%=item.href%>"><%=item.dir%></a></li>
+    <%})%>
+</body>
+</html>
