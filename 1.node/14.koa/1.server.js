@@ -10,10 +10,11 @@ app.use(function(ctx){
 
     // 自己封装的request上有原生的req属性
     // koa基于request对象自己封装了属性 let {pathname} = url.parse(req.url) =>path
-    console.log(ctx.req.url); // 原生的req对象
-    console.log(ctx.request.req.url); //原生的req对象
-    console.log(ctx.request.path); // 自己封装的/
+    // console.log(ctx.req.url); // 原生的req对象
+    // console.log(ctx.request.req.url); //原生的req对象
+    // console.log(ctx.request.path); // 自己封装的/
     // console.log(ctx.path); // 自己封装的
+    ctx.body = {hello: 'world'}
 })
 app.listen(3000, function() {
     console.log(`server start 3000`)
