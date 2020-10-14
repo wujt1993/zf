@@ -6,82 +6,73 @@ const Stream = require("stream");
 const { EventEmitter } = require("events");
 
 class application extends EventEmitter{
-
     constructor() {
         super();
-        //每一个应用应该有独立的上下文
         this.context = Object.create(context);
         this.request = Object.create(request);
         this.response = Object.create(response);
 
-        this.middleWares = []
+        this.middlewares = []
     }
-
-
     use(fn) {
-        //this.fn = fn
-        this.middleWares.push(fn);
+        this.middlewares.push(fn);
     }
-
-
     createContext(req, res) {
-        //每个请求应该有独立的ctx
         let ctx = Object.create(this.context);
         let request = Object.create(this.request);
         let response = Object.create(this.response);
 
-        
+
         ctx.request = request;
         ctx.response = response;
 
         ctx.request.req = ctx.req = req;
         ctx.response.res = ctx.res = res;
+
         return ctx;
+
     }
     compose(ctx) {
-        let i = -1;
-        const dispatch = (index) =>{
-            if(index <= i) return Promise.reject('next() called multiples');
-            if(index === this.middleWares.length) return Promise.resolve();
-            i = index;
-            let middleWare = this.middleWares[index];
+        const dispatch = (i) =>{
+            if(i === this.middlewares.length) return Promise.resolve();
+            let middleware = this.middlewares[i];
             try {
-                return Promise.resolve(middleWare(ctx, ()=>dispatch(index+1)))
+                return Promise.resolve(middleware(ctx, ()=>dispatch(i+1)))
             } catch (error) {
                 return Promise.reject(error)
             }
             
-
         }
-        return dispatch(0);
+        return dispatch(0)
     }
-    handleRequest(req, res) {
+    handlerRequest(req, res) {
         let ctx = this.createContext(req, res);
+        res.statusCode = 404;
         this.compose(ctx).then(()=>{
-            let body = ctx.body; // 最终将body的结果返回获取
-            if (typeof body == 'string' || Buffer.isBuffer(body)) {
-                res.end(ctx.body); // 用户多次设置只采用最后一次
-            } else if (body instanceof Stream) {
-                // res.setHeader(`Content-Disposition`,`attachement;filename=${encodeURIComponent('下载')}`);
-                body.pipe(res); // 可读流. pipe(可写流)
-            } else if (typeof body == 'object') {
+            let body = ctx.body;
+            if(body == null) {
+                res.end("not found");
+            }else if(typeof body === 'string' || Buffer.isBuffer(body)) {
+                res.end(body)
+            }else if( body instanceof Stream) {
+                body.pipe(res)
+            }else{
                 res.end(JSON.stringify(body))
-            } else {
-                res.end(`Not Found`);
             }
-        }).catch(e=>{
-            this.emit("error", e)
+        }).catch(err=>{
+            this.emit("error", err)
         })
         
-        this.on("error", ()=>{
+        this.on("error", function(err) {
             res.statusCode = 500;
-            res.end('Internal Error')
+            res.end("Internal Error")
         })
-    }
 
+        
+    }
     listen(...args) {
-        const server = http.createServer(this.handleRequest.bind(this))
-        server.listen(...args)
+        const server = http.createServer(this.handlerRequest.bind(this));
+        server.listen(...args);
     }
 }
 

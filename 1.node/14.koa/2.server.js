@@ -26,6 +26,7 @@ app.use(async function(ctx, next) {
 })
 
 app.use(async function(ctx, next) {
+    throw Error("我错了")
     console.log(2);
     ctx.body = "2";
     await next();
