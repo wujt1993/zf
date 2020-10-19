@@ -16,7 +16,19 @@ let methods = [
 methods.forEach(method=>{
     arrayMethods[method] = function(...args) {
         let res = oldArrayProtoMethods[method].call(this, ...args);
-        console.log(`调用了数组${method}方法`);
+
+        let ob = this.__ob__;
+        let inserted;
+        switch (method) {
+            case 'push':
+            case 'unshift':
+                inserted = args;    
+                break;
+            case 'splice':
+                inserted = args.slice(2)
+        }
+        // console.log(`调用了数组${method}方法`);
+        ob.observeArray(inserted);
         return res
     }
 })

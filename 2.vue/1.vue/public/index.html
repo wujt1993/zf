@@ -6,19 +6,22 @@
     <title>Document</title>
 </head>
 <body>
+    <div id="app" a=1 b ="2">
+        <div style="color: red">
+            <span>{{name}}</span>
+        </div>
+    </div>
     <script src="/dist/vue.js"></script>
     <script>
         let vm = new Vue({
+            el: "#app",
             data() {
                 return {
                     name: 'zf',
                     age: '11',
-                    arr: [1,2,{item: 1}]
                 }
             }
         })
-        vm.arr.pop()
-        console.log(vm)
     </script>
 </body>
 </html>

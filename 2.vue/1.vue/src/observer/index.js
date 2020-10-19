@@ -4,6 +4,14 @@ import {arrayMethods} from  './array.js'
 class Observer{
     constructor(value) {
         //需要对数据进行重新定义
+
+        //将this 值挂载到this.__ob__ 以便外部使用，防止属性被遍历引起是死循环
+        Object.defineProperty(value, "__ob__", {
+            configurable: false,
+            enumerable: false,
+            value: this,
+        })
+
         //当value为数组时，并不对每个元素进行defineProperty
         //当数组长度发生变化时，监听数组数据：push、pop、unshift、shift、splice、reserve、 sort
         if(Array.isArray(value)) {
@@ -30,8 +38,6 @@ class Observer{
 export function defineReactive(data, key, value) {
     //如果value 也是个object对象，需要递归检测
     observe(value)
-
-
     Object.defineProperty(data, key, {
         get() {
             return value;
