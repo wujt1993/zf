@@ -119,7 +119,7 @@
               obj[key] = value;
             }
           });
-          attr.value = JSON.stringify(obj);
+          attr.value = obj;
         })();
       }
 
@@ -346,7 +346,108 @@
   function compileToFunctions(template) {
     var ast = parseHTML(template);
     var code = generate(ast);
-    console.log(code);
+    var render = "with(this){return ".concat(code, "}");
+    var fn = new Function(render);
+    return fn;
+  } // function a(){
+  //     with(this) {
+  //         console.log(b)
+  //     }
+  // }
+  // a.call({b:1}) // 1
+
+  var id = 0;
+
+  var Watcher = function Watcher(vm, fn, cb, options) {
+    _classCallCheck(this, Watcher);
+
+    this.vm = vm;
+    this.fn = fn;
+    this.cb = cb;
+    this.options = options;
+    this.id = id++;
+    this.fn(); // 调用传入的函数
+  };
+
+  function patch(oldVnode, vnode) {
+    // oldVnode 是一个真实的元素
+    var isRealElement = oldVnode.nodeType;
+
+    if (isRealElement) {
+      // 初次渲染
+      var oldElm = oldVnode; // id="app"
+
+      var parentElm = oldElm.parentNode; // body
+
+      var el = createElm(vnode);
+      parentElm.insertBefore(el, oldElm.nextSibling); // 将创建的节点查到原有的节点的下一个
+
+      parentElm.removeChild(oldElm);
+      return el; // vm.$el
+    }
+  }
+
+  function createElm(vnode) {
+    // 根据虚拟节点创建真实的节点
+    var tag = vnode.tag,
+        children = vnode.children,
+        key = vnode.key,
+        data = vnode.data,
+        text = vnode.text,
+        vm = vnode.vm;
+
+    if (typeof tag === 'string') {
+      // 可能是组件
+      vnode.el = document.createElement(tag); // 用vue的指令时 可以通过vnode拿到真实dom
+
+      updateProperties(vnode);
+      children.forEach(function (child) {
+        // 如果有儿子节点，就进行递归操作
+        vnode.el.appendChild(createElm(child));
+      });
+    } else {
+      vnode.el = document.createTextNode(text);
+    }
+
+    return vnode.el;
+  }
+
+  function updateProperties(vnode) {
+    var newProps = vnode.data || {}; // 属性
+
+    var el = vnode.el; // dom元素
+
+    for (var key in newProps) {
+      if (key == 'style') {
+        for (var styleName in newProps.style) {
+          el.style[styleName] = newProps.style[styleName];
+        }
+      } else if (key === 'class') {
+        el.className = newProps["class"];
+      } else {
+        el.setAttribute(key, newProps[key]);
+      }
+    }
+  }
+
+  function lifecycleMixin(Vue) {
+    Vue.prototype._update = function (vnode) {
+      var vm = this;
+      vm.$el = patch(vm.$options.el, vnode);
+    };
+  } //挂载组件
+
+  function mountComponent(vm, el) {
+    // 默认vue是通过watcher来进行渲染  = 渲染watcher （每一个组件都有一个渲染watcher）
+    var updateComponent = function updateComponent() {
+      var vnode = vm._render(); //生成虚拟节点
+
+
+      vm._update(vnode); // 将虚拟节点转为真实节点
+
+    };
+
+    new Watcher(vm, updateComponent, function () {}, true); // updateComponent();
   }
 
   var oldArrayProtoMethods = Array.prototype;
@@ -501,6 +602,7 @@
 
       var vm = this;
       var options = vm.$options;
+      vm.$options.el = el;
 
       if (!options.render) {
         var template = options.template;
@@ -511,7 +613,60 @@
 
         var render = compileToFunctions(template);
         options.render = render;
+      } //挂载组件
+
+
+      mountComponent(vm);
+    };
+  }
+
+  //创建虚拟节点
+  function createElement(vm, tag) {
+    var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+    for (var _len = arguments.length, children = new Array(_len > 3 ? _len - 3 : 0), _key = 3; _key < _len; _key++) {
+      children[_key - 3] = arguments[_key];
+    }
+
+    return vnode(vm, tag, data, data.key, children, undefined);
+  }
+  function createTextVnode(vm, text) {
+    return vnode(vm, undefined, undefined, undefined, undefined, text);
+  }
+
+  function vnode(vm, tag, data, key, children, text) {
+    return {
+      vm: vm,
+      tag: tag,
+      data: data,
+      key: key,
+      children: children,
+      text: text
+    };
+  }
+
+  function renderMixin(Vue) {
+    Vue.prototype._c = function () {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
       }
+
+      return createElement.apply(void 0, [this].concat(args));
+    };
+
+    Vue.prototype._v = function (text) {
+      return createTextVnode(this, text);
+    };
+
+    Vue.prototype._s = function (val) {
+      return val == null ? "" : _typeof(val) === 'object' ? JSON.stringify(val) : val;
+    };
+
+    Vue.prototype._render = function () {
+      var vm = this;
+      var render = vm.$options.render;
+      var vnode = render.call(vm);
+      return vnode;
     };
   }
 
@@ -520,6 +675,9 @@
   }
 
   initMixin(Vue);
+  lifecycleMixin(Vue); //将虚拟节点转换为真实节点
+
+  renderMixin(Vue); //创建虚拟节点
 
   return Vue;
 

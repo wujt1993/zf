@@ -12,7 +12,7 @@ function genProps(attrs) {
                     obj[key] = value
                 }
             });
-            attr.value = JSON.stringify(obj)
+            attr.value = obj
         }
 
         str += `${attr.name}:${JSON.stringify(attr.value)},`

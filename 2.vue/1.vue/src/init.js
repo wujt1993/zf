@@ -1,4 +1,5 @@
 import { compileToFunctions } from "./complier/index.js";
+import { mountComponent } from "./lifecycle.js";
 import { initState } from "./state";
 
 //初始化参数
@@ -23,6 +24,7 @@ export function initMixin(Vue){
         //3、options.el
         const vm = this;
         const options = vm.$options;
+        vm.$options.el = el;
         if(!options.render) {
             let template = options.template
             if(!template && el) {
@@ -32,6 +34,7 @@ export function initMixin(Vue){
             options.render = render;
         }
 
-        
+        //挂载组件
+        mountComponent(vm,el)
     }
 }

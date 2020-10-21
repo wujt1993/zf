@@ -7,10 +7,11 @@
 </head>
 <body>
     <div id="app" a=1 b ="2" style="color: green;font-size: 16px;">
-        hello 
+        {{age}}
         <div style="color: red">
             <span>! {{ name}} !</span>
         </div>
+        {{info.name}}
     </div>
     <script src="/dist/vue.js"></script>
     <script>
@@ -20,6 +21,9 @@
                 return {
                     name: 'zf',
                     age: '11',
+                    info: {
+                        name: 'kinth'
+                    }
                 }
             }
         })
