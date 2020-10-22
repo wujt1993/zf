@@ -27,6 +27,7 @@ methods.forEach(method=>{
             case 'splice':
                 inserted = args.slice(2)
         }
+        ob.dep.notify(); 
         // console.log(`调用了数组${method}方法`);
         ob.observeArray(inserted);
         return res

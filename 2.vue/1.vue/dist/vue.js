@@ -619,8 +619,9 @@
 
         case 'splice':
           inserted = args.slice(2);
-      } // console.log(`调用了数组${method}方法`);
+      }
 
+      ob.dep.notify(); // console.log(`调用了数组${method}方法`);
 
       ob.observeArray(inserted);
       return res;
@@ -631,8 +632,10 @@
     function Observer(value) {
       _classCallCheck(this, Observer);
 
-      //需要对数据进行重新定义
+      //给元素本身也加一个dep，主要用于数组
+      this.dep = new Dep(); //需要对数据进行重新定义
       //将this 值挂载到this.__ob__ 以便外部使用，防止属性被遍历引起是死循环
+
       Object.defineProperty(value, "__ob__", {
         configurable: false,
         enumerable: false,
@@ -667,9 +670,20 @@
     return Observer;
   }();
 
+  function dependArray(value) {
+    for (var i = 0; i < value.length; i++) {
+      var current = value[i];
+      current.__ob__ && current.__ob__.dep.depend();
+
+      if (Array.isArray(current)) {
+        dependArray(current);
+      }
+    }
+  }
+
   function defineReactive(data, key, value) {
     //如果value 也是个object对象，需要递归检测
-    observe(value); //每个属性都有一个dep
+    var childOb = observe(value); //每个属性都有一个dep
 
     var dep = new Dep();
     Object.defineProperty(data, key, {
@@ -678,6 +692,14 @@
           //模板取值的时候才会进行依赖搜集
           // 让这个属性自己的dep记住这个watcher，也要让watcher记住这个dep
           dep.depend();
+
+          if (childOb) {
+            childOb.dep.depend();
+
+            if (Array.isArray(value)) {
+              dependArray(value);
+            }
+          }
         }
 
         return value;

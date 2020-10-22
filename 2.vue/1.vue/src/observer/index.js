@@ -3,6 +3,11 @@ import {arrayMethods} from  './array.js'
 import Dep from "./Dep"
 class Observer{
     constructor(value) {
+
+
+        //给元素本身也加一个dep，主要用于数组
+        this.dep = new Dep();
+
         //需要对数据进行重新定义
 
         //将this 值挂载到this.__ob__ 以便外部使用，防止属性被遍历引起是死循环
@@ -34,10 +39,18 @@ class Observer{
         });
     }
 }
-
+function dependArray(value) {
+    for(let i = 0; i < value.length; i++) {
+        let current = value[i];
+        current.__ob__ && current.__ob__.dep.depend();
+        if(Array.isArray(current)) {
+            dependArray(current)
+        }
+    }
+}
 export function defineReactive(data, key, value) {
     //如果value 也是个object对象，需要递归检测
-    observe(value)
+    let childOb = observe(value)
     //每个属性都有一个dep
     let dep = new Dep();
     Object.defineProperty(data, key, {
@@ -45,6 +58,12 @@ export function defineReactive(data, key, value) {
             if(Dep.target) {//模板取值的时候才会进行依赖搜集
                 // 让这个属性自己的dep记住这个watcher，也要让watcher记住这个dep
                 dep.depend();
+                if(childOb){
+                    childOb.dep.depend();
+                    if(Array.isArray(value)) {
+                        dependArray(value)
+                    }
+                }
             }
             return value;
         },
