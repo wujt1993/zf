@@ -6,11 +6,12 @@
     <title>Document</title>
 </head>
 <body>
-    <div id="app">
-        <ul>
-            <li>{{name}}</li>
-            <li>{{age}}</li>
-        </ul>
+    <div id="app" a=1 b ="2" style="color: green;font-size: 16px;">
+        {{age}}
+        <div style="color: red">
+            <span>! {{ name}} !</span>
+        </div>
+        {{info.name}}
     </div>
     <script src="/dist/vue.js"></script>
     <script>
@@ -19,19 +20,13 @@
             data() {
                 return {
                     name: 'zf',
-                    age: '11'
+                    age: '11',
+                    info: {
+                        name: 'kinth'
+                    }
                 }
             }
         })
-        setTimeout(()=>{
-            vm.name = "kinth"
-            vm.$nextTick(()=>{
-                console.log(vm.$options.el.innerHTML)
-            })
-        },1000)
-        
-        // let render = vm._render();
-        // vm._update(render)
     </script>
 </body>
 </html>

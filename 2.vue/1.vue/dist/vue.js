@@ -356,18 +356,162 @@
   // }
   // a.call({b:1}) // 1
 
+  // 我们可以把当前的watcher 放到一个全局变量上
   var id = 0;
 
-  var Watcher = function Watcher(vm, fn, cb, options) {
-    _classCallCheck(this, Watcher);
+  var Dep = /*#__PURE__*/function () {
+    function Dep() {
+      _classCallCheck(this, Dep);
 
-    this.vm = vm;
-    this.fn = fn;
-    this.cb = cb;
-    this.options = options;
-    this.id = id++;
-    this.fn(); // 调用传入的函数
-  };
+      this.id = id++;
+      this.subs = []; //记住watcher
+    }
+
+    _createClass(Dep, [{
+      key: "depend",
+      value: function depend() {
+        // 让watcher 记住dep
+        Dep.target.addDep(this);
+      }
+    }, {
+      key: "addSub",
+      value: function addSub(watcher) {
+        this.subs.push(watcher);
+      }
+    }, {
+      key: "notify",
+      value: function notify() {
+        //通知所有的watcher 执行 ，更新模板
+        this.subs.forEach(function (watcher) {
+          return watcher.update();
+        });
+      }
+    }]);
+
+    return Dep;
+  }();
+
+  Dep.target = null;
+  function pushTarget(watcher) {
+    Dep.target = watcher;
+  }
+  function popTarget(watcher) {
+    Dep.target = null;
+  }
+
+  var callbacks = [];
+  var waiting = false;
+
+  function flushCallbacks() {
+    for (var i = 0; i < callbacks.length; i++) {
+      var callback = callbacks[i];
+      callback();
+    }
+
+    waiting = false;
+    callbacks = [];
+  } // 批处理 第一次开定时器 ，后续只更新列表 ，之后执行清空逻辑
+  // 1.第一次cb渲染watcher更新操作  （渲染watcher执行的过程肯定是同步的）
+  // 2.第二次cb 用户传入的回调
+
+
+  function nextTick(cb) {
+    callbacks.push(cb); // 默认的cb 是渲染逻辑 用户的逻辑放到渲染逻辑之后即可
+
+    if (!waiting) {
+      waiting = true; // 1.promise先看支持不支持 
+      // 2.mutationObserver
+      // 3.setImmdiate
+      // 4.setTimeout  Vue3 next-tick就直接用了promise
+
+      Promise.resolve().then(flushCallbacks); // 多次调用nextTick 只会开启一个promise
+    }
+  } // nextTick 肯定有异步功能
+
+  var has = {};
+  var queue = [];
+  var pending = false;
+
+  function flushSchedularQueue() {
+    for (var i = 0, len = queue.length; i < len; i++) {
+      queue[i].run();
+    }
+
+    has = {};
+    queue = [];
+    pending = false;
+  }
+
+  function queueWatcher(watcher) {
+    var id = watcher.id;
+
+    if (has.id == null) {
+      has.id = id;
+      queue.push(watcher);
+
+      if (!pending) {
+        pending = true; // setTimeout(()=>{
+        //     flushSchedularQueue()
+        // },0)
+
+        nextTick(flushSchedularQueue);
+      }
+    }
+  }
+
+  var id$1 = 0;
+
+  var Watcher = /*#__PURE__*/function () {
+    function Watcher(vm, exprOrFn, cb, options) {
+      _classCallCheck(this, Watcher);
+
+      this.vm = vm;
+      this.cb = cb;
+      this.options = options;
+      this.id = id$1++;
+      this.getter = exprOrFn;
+      this.deps = [];
+      this.depsId = new Set();
+      this.get(); // 调用传入的函数， 调用了render方法， 此时会对模板中的数据进行取值
+    }
+
+    _createClass(Watcher, [{
+      key: "get",
+      value: function get() {
+        //每一次组件渲染都会调用此方法
+        pushTarget(this);
+        this.getter();
+        popTarget();
+      }
+    }, {
+      key: "addDep",
+      value: function addDep(dep) {
+        //当页面调用属性时，则会调用该方法，所以需要去重
+        var id = dep.id;
+
+        if (!this.depsId.has(id)) {
+          // dep 是非重复的，watcher肯定也不会重
+          this.depsId.add(id);
+          this.deps.push(dep);
+          dep.addSub(this); //dep也需要记录watcher
+        }
+      }
+    }, {
+      key: "run",
+      value: function run() {
+        this.getter();
+      }
+    }, {
+      key: "update",
+      value: function update() {
+        // 如果多次更改 我希望合并成一次  （防抖）
+        // this.get(); // 不停的重新渲染
+        queueWatcher(this);
+      }
+    }]);
+
+    return Watcher;
+  }();
 
   function patch(oldVnode, vnode) {
     // oldVnode 是一个真实的元素
@@ -432,8 +576,9 @@
 
   function lifecycleMixin(Vue) {
     Vue.prototype._update = function (vnode) {
-      var vm = this;
-      vm.$el = patch(vm.$options.el, vnode);
+      var vm = this; //TODO 后期修改
+
+      vm.$options.el = patch(vm.$options.el, vnode);
     };
   } //挂载组件
 
@@ -524,9 +669,17 @@
 
   function defineReactive(data, key, value) {
     //如果value 也是个object对象，需要递归检测
-    observe(value);
+    observe(value); //每个属性都有一个dep
+
+    var dep = new Dep();
     Object.defineProperty(data, key, {
       get: function get() {
+        if (Dep.target) {
+          //模板取值的时候才会进行依赖搜集
+          // 让这个属性自己的dep记住这个watcher，也要让watcher记住这个dep
+          dep.depend();
+        }
+
         return value;
       },
       set: function set(newValue) {
@@ -534,6 +687,7 @@
 
         observe(newValue);
         value = newValue;
+        dep.notify(); //通知dep执行watcher更新模板
       }
     });
   } //检测数据
@@ -594,6 +748,8 @@
         this.$mounted(vm.$options.el);
       }
     };
+
+    Vue.prototype.$nextTick = nextTick;
 
     Vue.prototype.$mounted = function (el) {
       el = document.querySelector(el); //1、options.render

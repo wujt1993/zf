@@ -5,7 +5,9 @@ import {patch} from './vdom/patch'
 export function lifecycleMixin(Vue) {
     Vue.prototype._update = function(vnode) {
         const vm = this;
-        vm.$el = patch(vm.$options.el, vnode);
+
+        //TODO 后期修改
+        vm.$options.el = patch(vm.$options.el, vnode);
     }
 }
 

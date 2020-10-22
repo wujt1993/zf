@@ -1,6 +1,7 @@
 import { compileToFunctions } from "./complier/index.js";
 import { mountComponent } from "./lifecycle.js";
 import { initState } from "./state";
+import { nextTick } from './util'
 
 //初始化参数
 export function initMixin(Vue){
@@ -16,7 +17,7 @@ export function initMixin(Vue){
             this.$mounted(vm.$options.el)
         }
     }
-
+    Vue.prototype.$nextTick = nextTick
     Vue.prototype.$mounted = function(el) {
         el = document.querySelector(el);
         //1、options.render
@@ -33,7 +34,6 @@ export function initMixin(Vue){
             const render = compileToFunctions(template);
             options.render = render;
         }
-
         //挂载组件
         mountComponent(vm,el)
     }

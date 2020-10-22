@@ -1,6 +1,6 @@
 
 import {arrayMethods} from  './array.js'
-
+import Dep from "./Dep"
 class Observer{
     constructor(value) {
         //需要对数据进行重新定义
@@ -38,8 +38,14 @@ class Observer{
 export function defineReactive(data, key, value) {
     //如果value 也是个object对象，需要递归检测
     observe(value)
+    //每个属性都有一个dep
+    let dep = new Dep();
     Object.defineProperty(data, key, {
         get() {
+            if(Dep.target) {//模板取值的时候才会进行依赖搜集
+                // 让这个属性自己的dep记住这个watcher，也要让watcher记住这个dep
+                dep.depend();
+            }
             return value;
         },
         set(newValue) {
@@ -47,6 +53,7 @@ export function defineReactive(data, key, value) {
             //如果赋值为object对象,需要检测数据
             observe(newValue)
             value = newValue 
+            dep.notify() //通知dep执行watcher更新模板
         }
     })
 }
