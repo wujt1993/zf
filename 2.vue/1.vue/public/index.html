@@ -6,31 +6,40 @@
     <title>Document</title>
 </head>
 <body>
-    <div id="app">
-        <ul>
-            <li>{{arr}}</li>
-        </ul>
-    </div>
+    <div id="app"></div>
     <script src="/dist/vue.js"></script>
     <script>
-        let vm = new Vue({
-            el: "#app",
-            data() {
-                return {
-                    arr: [[1,2,3]]
-                }
+        Vue.mixin({
+            a: 1,
+            b: 2,
+            beforeCreate() {
+                console.log("beforeCreate1")
+            },
+            created() {
+                console.log('created1')
             }
         })
-        setTimeout(()=>{
-            vm.arr[0].push(4,5)
-            vm.arr.push(4,5)
-            vm.$nextTick(()=>{
-                console.log(vm.$options.el.innerHTML)
-            })
-        },1000)
+
+        Vue.mixin({
+            a: 'a',
+            c: 'c',
+            beforeCreate() {
+                console.log("beforeCreate1-1")
+            },
+            created() {
+                console.log('created1-1')
+            }
+        })
+        let vm = new Vue({
+            el: "#app",
+            beforeCreate() {
+                console.log("beforeCreate2")
+            },
+            created() {
+                console.log('created2')
+            }
+        })
         
-        // let render = vm._render();
-        // vm._update(render)
     </script>
 </body>
 </html>

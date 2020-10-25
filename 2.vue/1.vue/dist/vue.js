@@ -42,6 +42,55 @@
     return Constructor;
   }
 
+  function _defineProperty(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+
+    return obj;
+  }
+
+  function ownKeys(object, enumerableOnly) {
+    var keys = Object.keys(object);
+
+    if (Object.getOwnPropertySymbols) {
+      var symbols = Object.getOwnPropertySymbols(object);
+      if (enumerableOnly) symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      });
+      keys.push.apply(keys, symbols);
+    }
+
+    return keys;
+  }
+
+  function _objectSpread2(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i] != null ? arguments[i] : {};
+
+      if (i % 2) {
+        ownKeys(Object(source), true).forEach(function (key) {
+          _defineProperty(target, key, source[key]);
+        });
+      } else if (Object.getOwnPropertyDescriptors) {
+        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+      } else {
+        ownKeys(Object(source)).forEach(function (key) {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        });
+      }
+    }
+
+    return target;
+  }
+
   function _slicedToArray(arr, i) {
     return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
   }
@@ -426,7 +475,61 @@
 
       Promise.resolve().then(flushCallbacks); // 多次调用nextTick 只会开启一个promise
     }
-  } // nextTick 肯定有异步功能
+  }
+  function isObject(item) {
+    return _typeof(item) === 'object' && item !== null;
+  }
+  var LIFECYCLE_HOOKS = ['beforeCreate', 'created', 'beforeMount', 'mounted'];
+  var strats = {};
+
+  function mergeHook(parentVal, childVal) {
+    if (childVal) {
+      if (parentVal) {
+        return parentVal.concat(childVal);
+      } else {
+        return [childVal];
+      }
+    } else {
+      return [parentVal];
+    }
+  }
+
+  LIFECYCLE_HOOKS.forEach(function (hook) {
+    strats[hook] = mergeHook;
+  });
+  function mergeOptions(parent, child) {
+    //1、自定义策略
+    //2、父级元素有子元素没，则用父级元素
+    //3、子元素有，则用子元素
+    var options = {};
+
+    for (var key in parent) {
+      mergeFiled(key);
+    }
+
+    for (var _key in child) {
+      if (!parent[_key]) mergeFiled(_key);
+    }
+
+    function mergeFiled(key) {
+      if (strats[key]) {
+        options[key] = mergeHook(parent[key], child[key]);
+        return;
+      }
+
+      if (isObject(parent[key]) && isObject(child[key])) {
+        options[key] = _objectSpread2(_objectSpread2({}, parent[key]), child[key]);
+      } else {
+        if (child[key]) {
+          options[key] = child[key];
+        } else {
+          options[key] = parent[key];
+        }
+      }
+    }
+
+    return options;
+  }
 
   var has = {};
   var queue = [];
@@ -578,8 +681,17 @@
     Vue.prototype._update = function (vnode) {
       var vm = this; //TODO 后期修改
 
-      vm.$options.el = patch(vm.$options.el, vnode);
+      vm.$el = patch(vm.$el, vnode);
     };
+  }
+  function callhook(vm, hook) {
+    var handlers = vm.$options[hook];
+
+    if (handlers) {
+      handlers.forEach(function (hanler) {
+        return hanler.call(vm);
+      });
+    }
   } //挂载组件
 
   function mountComponent(vm, el) {
@@ -762,9 +874,12 @@
     Vue.prototype._init = function (options) {
       // vue 可以通过$options 获取配置信息
       var vm = this;
-      vm.$options = options; //初始化状态
+      vm.$options = mergeOptions(vm.constructor.options, options);
+      console.log(vm.$options); //初始化状态
 
+      callhook(vm, 'beforeCreate');
       initState(vm);
+      callhook(vm, 'created');
 
       if (vm.$options.el) {
         this.$mounted(vm.$options.el);
@@ -780,7 +895,7 @@
 
       var vm = this;
       var options = vm.$options;
-      vm.$options.el = el;
+      vm.$el = el;
 
       if (!options.render) {
         var template = options.template;
@@ -848,6 +963,15 @@
     };
   }
 
+  function initGlobalAPI(Vue) {
+    Vue.options = {};
+
+    Vue.mixin = function (mixin) {
+      this.options = mergeOptions(this.options, mixin);
+      return this;
+    };
+  }
+
   function Vue(options) {
     this._init(options);
   }
@@ -856,6 +980,8 @@
   lifecycleMixin(Vue); //将虚拟节点转换为真实节点
 
   renderMixin(Vue); //创建虚拟节点
+
+  initGlobalAPI(Vue);
 
   return Vue;
 

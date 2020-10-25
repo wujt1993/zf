@@ -7,10 +7,17 @@ export function lifecycleMixin(Vue) {
         const vm = this;
 
         //TODO 后期修改
-        vm.$options.el = patch(vm.$options.el, vnode);
+        vm.$el = patch(vm.$el, vnode);
     }
 }
 
+export function callhook(vm, hook){
+    let handlers = vm.$options[hook];
+    if(handlers){
+        handlers.forEach(hanler=>hanler.call(vm));
+    }
+    
+}
 
 //挂载组件
 export function mountComponent(vm, el) {
