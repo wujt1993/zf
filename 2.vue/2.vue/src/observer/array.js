@@ -27,8 +27,8 @@ methods.forEach(method=> {
                 inserted = args.slice(2)
         }
         // console.log(`调用了数组${method}方法`);
-        ob.observeArray(inserted);
-        
+        if(inserted) ob.observeArray(inserted);
+        ob.dep.notify();
         return res;
     }
 })

@@ -235,12 +235,130 @@
     // }
     // a.call({b:1}) // 1
 
+    let id = 0;
+
+    class Dep {
+      constructor() {
+        this.id = id++;
+        this.subs = [];
+      }
+
+      depend() {
+        Dep.target.addDep(this); //让每个watcher 记住dep
+      }
+
+      addSub(watcher) {
+        this.subs.push(watcher);
+      }
+
+      notify() {
+        this.subs.forEach(watcher => {
+          watcher.update();
+        });
+      }
+
+    }
+
+    Dep.target = null;
+    function pushTarget(watcher) {
+      Dep.target = watcher;
+    }
+    function popTarget() {
+      Dep.target = null;
+    }
+
+    let callbacks = [];
+    let waiting = false;
+
+    function flushCallbacks() {
+      for (let i = 0; i < callbacks.length; i++) {
+        let callback = callbacks[i];
+        callback();
+      }
+
+      waiting = false;
+      callbacks = [];
+    }
+
+    function nextTick(cb) {
+      callbacks.push(cb);
+
+      if (!waiting) {
+        waiting = true; // 1.promise先看支持不支持 
+        // 2.mutationObserver
+        // 3.setImmdiate
+        // 4.setTimeout  Vue3 next-tick就直接用了promise
+
+        return Promise.resolve().then(flushCallbacks);
+      }
+    }
+
+    let has = {};
+    let queue = [];
+    let pending = false;
+
+    function flushSchedularQueue() {
+      for (let i = 0; i < queue.length; i++) {
+        let watcher = queue[i];
+        watcher.run();
+      }
+
+      has = {};
+      queue = [];
+      pending = false;
+    }
+
+    function queueWatcher(watcher) {
+      let id = watcher.id;
+
+      if (!has[id]) {
+        has[id] = true;
+        queue.push(watcher);
+
+        if (!pending) {
+          pending = true;
+          nextTick(flushSchedularQueue);
+        }
+      }
+    }
+
+    let id$1 = 0;
+
     class Watcher {
       constructor(vm, exprOrFn, cb, options) {
         this.vm = vm;
         this.cb = cb;
         this.options = options;
-        exprOrFn();
+        this.id = id$1++;
+        this.getter = exprOrFn;
+        this.deps = [];
+        this.depsId = new Set();
+        this.get(); // 调用传入的函数， 调用了render方法， 此时会对模板中的数据进行取值
+      }
+
+      get() {
+        //当页面渲染时，注册一个watcher
+        pushTarget(this);
+        this.getter();
+        popTarget();
+      }
+
+      addDep(dep) {
+        let id = dep.id;
+
+        if (!this.depsId.has(id)) {
+          this.deps.push(dep);
+          this.depsId.add(id);
+          dep.addSub(this);
+        }
+      }
+
+      run() {
+        this.get();
+      }
+
+      update() {
+        queueWatcher(this);
       }
 
     }
@@ -348,7 +466,8 @@
         } // console.log(`调用了数组${method}方法`);
 
 
-        ob.observeArray(inserted);
+        if (inserted) ob.observeArray(inserted);
+        ob.dep.notify();
         return res;
       };
     });
@@ -360,6 +479,7 @@
           enumerable: false,
           value: this
         });
+        this.dep = new Dep(); // 给数组本身和对象本身增加一个dep属性
 
         if (Array.isArray(value)) {
           //监听删除、添加、排序、反转元素的方法
@@ -384,16 +504,45 @@
 
     }
 
+    function dependArray(value) {
+      // 就是让里层数组收集外层数组的依赖，这样修改里层数组也可以更新视图 
+      for (let i = 0; i < value.length; i++) {
+        let current = value[i];
+        current.__ob__ && current.__ob__.dep.depend(); // 让里层的和外层收集的都是同一个watcher
+
+        if (Array.isArray(current)) {
+          dependArray(current);
+        }
+      }
+    }
+
     function defineReactive(data, key, value) {
-      observe(value);
+      let childOb = observe(value);
+      let dep = new Dep(); // 每次都会给属性创建一个dep
+
       Object.defineProperty(data, key, {
         get() {
+          if (Dep.target) {
+            dep.depend(); // 让这个属性自己的dep记住这个watcher，也要让watcher记住这个dep
+
+            if (childOb) {
+              // 如果对数组取值 会将当前的watcher和数组进行关联
+              childOb.dep.depend();
+
+              if (Array.isArray(value)) {
+                dependArray(value);
+              }
+            }
+          }
+
           return value;
         },
 
         set(newValue) {
           if (newValue === value) return;
           value = newValue;
+          observe(newValue);
+          dep.notify(); // 通知dep中记录的watcher让它去执行
         }
 
       });
@@ -401,6 +550,11 @@
 
     function observe(data) {
       if (typeof data !== 'object' || data === null) {
+        return;
+      }
+
+      if (data.__ob__) {
+        // 放置循环引用了
         return;
       }
 
@@ -452,6 +606,8 @@
           this.$mounted(vm.$options.el);
         }
       };
+
+      Vue.prototype.$nextTick = nextTick;
 
       Vue.prototype.$mounted = function (el) {
         el = document.querySelector(el);
