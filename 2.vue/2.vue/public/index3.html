@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        {{arr}}
+    </div>
+    <script src="/dist/vue.js"></script>
+    <script>
+        let vm = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    arr: [[1,2,3]]
+                }
+            }
+        });
+        setTimeout(()=>{
+            vm.arr[0].push(4,5);
+            vm.arr.push(6,7);
+            setTimeout(()=>{
+                console.log(vm.$el.innerHTML);
+            },0)
+            
+        },1000)
+    </script>
+</body>
+</html>

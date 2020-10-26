@@ -4,6 +4,96 @@
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Vue = factory());
 }(this, (function () { 'use strict';
 
+    let callbacks = [];
+    let waiting = false;
+
+    function flushCallbacks() {
+      for (let i = 0; i < callbacks.length; i++) {
+        let callback = callbacks[i];
+        callback();
+      }
+
+      waiting = false;
+      callbacks = [];
+    }
+
+    function nextTick(cb) {
+      callbacks.push(cb);
+
+      if (!waiting) {
+        waiting = true; // 1.promise先看支持不支持 
+        // 2.mutationObserver
+        // 3.setImmdiate
+        // 4.setTimeout  Vue3 next-tick就直接用了promise
+
+        return Promise.resolve().then(flushCallbacks);
+      }
+    } //vue 的生命周期函数
+
+    let strats = {};
+    let LIFECYCLE_HOOKS = ['beforeCreate', 'created', 'beforeMount', 'mounted' //....
+    ];
+
+    function mergeHook(parentVal, childVal) {
+      if (childVal) {
+        if (parentVal) {
+          return parentVal.concat(childVal);
+        } else {
+          return [childVal];
+        }
+      } else {
+        return parentVal;
+      }
+    }
+
+    LIFECYCLE_HOOKS.forEach(hook => {
+      strats[hook] = mergeHook;
+    });
+    function isObject(val) {
+      return typeof val === 'object' && val !== null;
+    }
+    function mergeOptions(parent, child) {
+      let options = {};
+
+      for (let key in parent) {
+        mergeField(key);
+      }
+
+      for (let key in child) {
+        if (parent.hasOwnProperty(key)) continue;
+        mergeField(key);
+      }
+
+      function mergeField(key) {
+        if (strats[key]) {
+          return options[key] = strats[key](parent[key], child[key]);
+        }
+
+        if (isObject(parent[key])) {
+          options[key] = { ...parent[key],
+            ...child[key]
+          };
+        } else {
+          if (child[key]) {
+            options[key] = child[key];
+          } else {
+            options[key] = parent[key];
+          }
+        }
+      }
+
+      return options;
+    }
+
+    function initGlobalAPI(Vue) {
+      Vue.options = {};
+
+      Vue.mixin = function (mixin) {
+        this.options = mergeOptions(this.options, mixin);
+        return this;
+      };
+    }
+
     const defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g;
 
     function genProps(attrs) {
@@ -267,32 +357,6 @@
       Dep.target = null;
     }
 
-    let callbacks = [];
-    let waiting = false;
-
-    function flushCallbacks() {
-      for (let i = 0; i < callbacks.length; i++) {
-        let callback = callbacks[i];
-        callback();
-      }
-
-      waiting = false;
-      callbacks = [];
-    }
-
-    function nextTick(cb) {
-      callbacks.push(cb);
-
-      if (!waiting) {
-        waiting = true; // 1.promise先看支持不支持 
-        // 2.mutationObserver
-        // 3.setImmdiate
-        // 4.setTimeout  Vue3 next-tick就直接用了promise
-
-        return Promise.resolve().then(flushCallbacks);
-      }
-    }
-
     let has = {};
     let queue = [];
     let pending = false;
@@ -431,6 +495,12 @@
         const vm = this;
         vm.$el = patch(vm.$el, vnode);
       };
+    }
+    function callHook(vm, hook) {
+      let handlers = vm.$options[hook];
+      handlers.forEach(handler => {
+        handler.call(vm);
+      });
     } //组件挂载
 
     function mountComponent(vm, el) {
@@ -597,9 +667,11 @@
     function initMixin(Vue) {
       Vue.prototype._init = function (options) {
         let vm = this;
-        vm.$options = options; //初始化状态
+        vm.$options = mergeOptions(vm.constructor.options, options); //初始化状态
 
+        callHook(vm, 'beforeCreate');
         initState(vm);
+        callHook(vm, 'created');
 
         if (vm.$options.el) {
           //获取要渲染的模板
@@ -677,6 +749,7 @@
     initMixin(Vue);
     lifecycleMixin(Vue);
     renderMixin(Vue);
+    initGlobalAPI(Vue);
 
     return Vue;
 

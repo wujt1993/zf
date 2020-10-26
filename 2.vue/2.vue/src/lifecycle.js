@@ -8,6 +8,13 @@ export function lifecycleMixin(Vue) {
     }
 }
 
+export function callHook(vm, hook) {
+    let handlers = vm.$options[hook];
+    handlers.forEach(handler=>{
+        handler.call(vm)
+    })
+}
+
 //组件挂载
 export function mountComponent(vm, el) {
      // 默认vue是通过watcher来进行渲染  = 渲染watcher （每一个组件都有一个渲染watcher）

@@ -1,15 +1,17 @@
 import { compileToFunctions } from "./complier/index";
-import { mountComponent } from "./lifecycle";
+import { callHook, mountComponent } from "./lifecycle";
 import { initState } from "./state";
-import { nextTick } from "./util";
+import { mergeOptions, nextTick } from "./util";
 
 
 export function initMixin(Vue){
     Vue.prototype._init = function(options) {
         let vm = this;
-        vm.$options = options;
+        vm.$options = mergeOptions(vm.constructor.options, options);
         //初始化状态
+        callHook(vm,'beforeCreate');
         initState(vm);
+        callHook(vm,'created');
 
         if(vm.$options.el) {//获取要渲染的模板
             this.$mounted(vm.$options.el)
