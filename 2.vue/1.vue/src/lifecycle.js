@@ -6,7 +6,6 @@ export function lifecycleMixin(Vue) {
     Vue.prototype._update = function(vnode) {
         const vm = this;
 
-        //TODO 后期修改
         vm.$el = patch(vm.$el, vnode);
     }
 }

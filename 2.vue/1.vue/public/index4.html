@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script src="/dist/vue.js"></script>
+    <script>
+        Vue.mixin({
+            a: 1,
+            b: 2,
+            beforeCreate() {
+                console.log("beforeCreate1")
+            },
+            created() {
+                console.log('created1')
+            }
+        })
+
+        Vue.mixin({
+            a: 'a',
+            c: 'c',
+            beforeCreate() {
+                console.log("beforeCreate1-1")
+            },
+            created() {
+                console.log('created1-1')
+            }
+        })
+        let vm = new Vue({
+            el: "#app",
+            beforeCreate() {
+                console.log("beforeCreate2")
+            },
+            created() {
+                console.log('created2')
+            }
+        })
+        
+    </script>
+</body>
+</html>
