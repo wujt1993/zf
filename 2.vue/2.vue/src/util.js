@@ -47,6 +47,15 @@ LIFECYCLE_HOOKS.forEach(hook=>{
     strats[hook] = mergeHook;
 })
 
+strats.components = function(parentVal, childVal) {
+    const res = Object.create(parentVal);
+    if (childVal) {
+        for (let key in childVal) {
+            res[key] = childVal[key];
+        }
+    }
+    return res;
+}
 
 export function isObject(val) {
     return typeof val === 'object' &&  val !== null;
@@ -82,3 +91,13 @@ export function mergeOptions(parent, child) {
 
     return options;
 }
+
+function makeUp(str) {
+    let map = {}
+    str.split(",").forEach(item=>{
+        map[item] = true
+    })
+    return (tag) => map[tag] || false
+}
+
+export const isReservedTag = makeUp('div,ul,li,p,h1,h2,h3,h4,h5,h6,table,input,button,em,i,span,a');

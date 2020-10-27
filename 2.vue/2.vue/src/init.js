@@ -8,11 +8,11 @@ export function initMixin(Vue){
     Vue.prototype._init = function(options) {
         let vm = this;
         vm.$options = mergeOptions(vm.constructor.options, options);
+        console.log(vm.$options)
         //初始化状态
         callHook(vm,'beforeCreate');
         initState(vm);
         callHook(vm,'created');
-
         if(vm.$options.el) {//获取要渲染的模板
             this.$mounted(vm.$options.el)
         }
@@ -33,7 +33,7 @@ export function initMixin(Vue){
             options.render = render
         }
 
-        mountComponent(vm, el);
+        mountComponent(vm);
         
     }
 }

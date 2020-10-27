@@ -7,40 +7,23 @@
 </head>
 <body>
     <div id="app">
-        {{a}}
+        <my-button></my-button>
+        <my-div></my-div>
     </div>
     <script src="/dist/vue.js"></script>
     <script>
-        Vue.mixin({
-            beforeCreate() {
-                console.log('before-create-1')
-            },
-            created() {
-                console.log('create-1')
-            }
-            
+        Vue.component('my-button', {
+            template: '<button>外部按钮</button>'
         })
-        Vue.mixin({
-            beforeCreate() {
-                console.log('before-create-2')
-            },
-            created() {
-                console.log('create-2')
-            }
-            
+        Vue.component('my-div', {
+            template: '<div style="color:red">div</div>'
         })
         let vm = new Vue({
             el: '#app',
-            data() {
-                return {
-                    a:3
+            components: {
+                'my-button': {
+                    template: '<button>内部按钮</button>'
                 }
-            },
-            beforeCreate() {
-                console.log('before-create-3')
-            },
-            created() {
-                console.log('create-3')
             }
         });
     </script>
