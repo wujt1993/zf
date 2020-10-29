@@ -25,9 +25,11 @@ let vm1 = new Vue({
     }
 })
 
-let render1 = compileToFunctions(`<ul style='font-size: 20px' a=1>
-    <li key="A">A</li>
+let render1 = compileToFunctions(`<ul>
+    
+    <li key="E">E</li>
     <li key="B">B</li>
+    <li key="A">A</li>
     <li key="C">C</li>
     <li key="D">D</li>
     
@@ -44,18 +46,15 @@ let vm2 = new Vue({
         }
     }
 })
-
-let render2 = compileToFunctions(`<ul style='color: red' b=2>
-<li key="E">E</li>
+let render2 = compileToFunctions(`<ul>
 <li key="A">A</li>
 <li key="B">B</li>
 <li key="C">C</li>
 <li key="D">D</li>
-
 </ul>`);
 let newVnode = render2.call(vm2);
 setTimeout(() => {
     patch(oldVnode, newVnode); //  包括了初渲染和diff算法的流程
-}, 2000);
+}, 4000);
 
 export default Vue;
