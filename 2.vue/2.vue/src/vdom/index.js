@@ -30,7 +30,6 @@ export function createTextVnode(vm, text) {
     return vnode(vm, undefined, undefined, undefined, undefined, text)
 }
 
-
 function vnode(vm, tag, data, key,children, text, componentOptions) {
     return {
         vm, 
@@ -41,4 +40,8 @@ function vnode(vm, tag, data, key,children, text, componentOptions) {
         text,
         componentOptions
     }
+}
+
+export function isSameVnode(oldVnode, newVNode) {
+    return (oldVnode.tag === newVNode.tag) && (oldVnode.key === newVNode.key)
 }
