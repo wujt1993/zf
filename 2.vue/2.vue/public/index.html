@@ -7,9 +7,27 @@
 </head>
 <body>
     <div id="app">
+        <div>{{name}}</div>
+        <div>{{info.age}}</div>
     </div>
     <script src="/dist/vue.js"></script>
     <script>
+        let vm = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    name: 'zf',
+                    info: {
+                        age: 11
+                    }
+                }
+            }
+        })
+
+        setTimeout(()=>{
+            vm.name = "kinth"
+            vm.info.age = 8
+        },3000)
     </script>
 </body>
 </html>
