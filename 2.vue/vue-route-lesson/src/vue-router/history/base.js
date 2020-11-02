@@ -8,7 +8,7 @@ export function createRoute(record, location) {
     }
     return{
         ...location,
-        res
+        matched: res
     }
 }
 
@@ -22,9 +22,17 @@ export default class History{
         });//{path:"", matchec:[]}
     }
 
-    transitionTo(location, cb) {
+    transitionTo(location, onComplete) {
+
         let route = this.router.match(location); // route = {path:'/about/a',matched:[{},{}]}
-        console.log(route);
-        cb && cb()
+        this.current = route;
+        this.cb && this.cb(route);
+        onComplete && onComplete()
     }
+
+    listen(cb) {
+        this.cb = cb
+    }
+
+
 }
