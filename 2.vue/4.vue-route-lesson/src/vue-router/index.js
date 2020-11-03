@@ -5,30 +5,25 @@ import { install } from "./install";
 
 export default class VueRouter {
     constructor(options) {
-        //返回matcher 、 addRoutes
+        //返回addRoutes 和 match
         this.matcher = createMatcher(options.routes || []);
-
-        switch(options.mode) {
-            case 'hash':
-                this.history = new HashHistory(this);
-                break
-            case 'history':
-                this.history = new BrowserHistory(this); 
+        this.beforeEachHooks = []
+        if(options.mode == "history") {
+            this.history = new BrowserHistory(this);
+        }else {
+            this.history = new HashHistory(this);
         }
     }
 
     init(app) {
-        // 路由初始化
-        // 初始化后 需要先根据路径做一次匹配，后续根据hash值的变化再次匹配
-        const history= this.history; // history的实例 
-        const setupListener = ()=>{ // 切片编程
-            history.setupListener(); // 监听hash值变化
-            // todo...
-        }// history模式
-        history.transitionTo(history.getCurrentLocation(),setupListener); // 跳转到哪里
+        const history = this.history;
+        const setUpListener = () =>{
+            history.setUpListener()
+        }
+        history.transitionTo(history.getCurrentPath(),setUpListener)
 
-        history.listen((route)=>{ // 改变了 响应式数据
-            app._route = route;
+        history.listen((route)=>{
+            app._route = route
         })
     }
 
@@ -36,12 +31,14 @@ export default class VueRouter {
         return this.matcher.match(location)
     }
 
-
     push(location) {
         this.history.push(location)
     }
 
-    
+    beforeEach(hook) {
+        this.beforeEachHooks.push(hook)
+    }
 }
 
-VueRouter.install = install;
+VueRouter.install = install
+

@@ -1,28 +1,32 @@
-export default function createRouteMap(routes,oldPathMap){
+
+
+export default function createRouteMap(routes, oldPathMap) {
     let pathMap = oldPathMap || {};
     routes.forEach(route => {
-        addRouteRecord(route, pathMap, null);
+        addRouteRecord(route,pathMap, null)
     });
-    return {
-        pathMap
-    }
+    return{pathMap}
 }
 
 function addRouteRecord(route, pathMap, parent) {
     let path = parent ? parent.path + "/" + route.path : route.path;
+    
     let record = {
         path,
         parent,
-        name: route.name,
         component: route.component,
-        params: route.params || {},
+        parmas: route.parmas || {},
+        meta: route.meta,
         props: route.props,
-        meta:route.meta
+        name: route.name
     }
-    pathMap[path] = record;
+
+    if(!pathMap[path]) {
+        pathMap[path] = record;
+    }
     if(route.children) {
         route.children.forEach(child => {
-            addRouteRecord(child, pathMap, route);
+            addRouteRecord(child, pathMap, route)
         })
     }
 }
