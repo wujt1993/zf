@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <h1>message:{{$store.state.message}}</h1>
+    <!-- <h1>message:{{$store.state.message}}</h1>
     <h1>age: {{$store.getters.getAge}}</h1>
-    <h2><button @click="$store.state.age++">change</button></h2>
+    <h2><button @click="$store.state.age++">change</button></h2> -->
     <!-- <h2>mapState   -> {{message}}</h2> -->
     <!-- <h1>getter     -> {{$store.getters.getMessage}}</h1> -->
     <!-- <h2>mapGetters -> {{getMessage}}</h2> -->
@@ -38,9 +38,9 @@ export default {
   },
   mounted() {
 
-    setTimeout(()=>{
-      this.$store.commit("setMessage", "hello mutations")
-    },2000)
+    // setTimeout(()=>{
+    //   this.$store.commit("setMessage", "hello mutations")
+    // },2000)
     // setTimeout(()=>{
     //   this.setMessage("hello mapmutations")
     // },3000)

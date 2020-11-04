@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <div v-once>{{msg}}</div>
+        {{attrName}}
+    </div>
+    <script src="vue.js"></script>
+    <script>
+        let vm = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    msg: 'hello message',
+                }
+            },
+            computed: {
+            },
+            mounted() {
+                setTimeout(()=>{
+                    this.msg = "hello change"
+                }, 1000)
+            }
+        })
+        
+    </script>
+</body>
+</html>

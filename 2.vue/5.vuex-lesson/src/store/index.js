@@ -39,9 +39,18 @@ export default new Vuex.Store({
         setMessage(state, message) {
           state.message = message + "_a"
         }
+      },
+      modules: {
+        c: {
+          namespaced: true,
+          state: {
+            message: 'hello a - c'
+          },
+        }
       }
     },
     b: {
+      namespaced: true,
       state: {
         message: 'hello b'
       }

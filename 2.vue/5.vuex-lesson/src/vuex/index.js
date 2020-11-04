@@ -1,11 +1,11 @@
+import {Store, install} from  "./store"
 
-import {Store, install} from './store'
 
 export {
     Store
 }
 
 export default {
-    Store, 
+    Store,
     install
 }

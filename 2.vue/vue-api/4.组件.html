@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <button-counter-1 v-on:add-count="addCount" :count="count"></button-counter-1>
+        <button-counter></button-counter>
+    </div>
+    <script src="vue.js"></script>
+    <script>
+        Vue.component('button-counter',{
+            name: 'button-counter',
+            data() {
+                return{
+                    count: 0
+                }
+                
+            },
+            template: `
+                <button v-on:click="count++">You clicked me {{ count }} times.</button>
+            `
+        })
+        Vue.component('button-counter-1',{
+            props: ['count'],
+            name: 'button-counter-1',
+            template: `
+                <button v-on:click="$emit('add-count')">{{ count }}</button>
+            `
+        })
+        let vm = new Vue({
+            el: "#app",
+            data() {
+                return {
+                    count: 0
+                }
+                
+            },
+            methods: {
+                addCount() {
+                    this.count++
+                }
+            }
+        })
+    </script>
+</body>
+</html>

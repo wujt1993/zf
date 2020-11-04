@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        {{data.a}}
+    </div>
+    <script src="vue.js"></script>
+    <script>
+        let data = {a: 1};
+        let obj = {b:1};
+        Object.freeze(obj);//冻结对象，对象将不能改变
+        let vm = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    data: data,
+                    obj: obj
+                }
+            }
+        })
+
+        setTimeout(()=>{
+            vm.data.a = 2;
+            console.log(data);
+
+            vm.obj.b = 2;
+            console.log(obj);
+        }, 1000)
+        
+    </script>
+</body>
+</html>
