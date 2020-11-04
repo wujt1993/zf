@@ -1,22 +1,26 @@
 import Vue from 'vue'
-import Vuex from 'vuex'
+import Vuex from '@/vuex'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    message: 'hello world'
+    message: 'kinth',
+    age: 8
   },
   mutations: {
     setMessage(state, message) {
-      debugger
       state.message = message
     }
   },
   getters: {
     getMessage(state) {
-      
+
       return state.message
-    }
+    },
+    getAge(state) {
+      console.log("oooo")
+      return state.age
+    },
   },
   actions: {
     setMessageAsync(store, message) {
