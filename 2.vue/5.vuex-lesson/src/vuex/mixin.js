@@ -1,3 +1,4 @@
+
 function vueInit() {
     if(this.$options.store) {
         this.$store = this.$options.store
@@ -6,7 +7,8 @@ function vueInit() {
     }
 }
 
-export const applyMixin = (Vue) => {
+export const applyMixin = function(Vue) {
+
     Vue.mixin({
         beforeCreate: vueInit
     })

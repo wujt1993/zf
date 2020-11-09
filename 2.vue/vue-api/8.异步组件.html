@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <async-example></async-example>
+    </div>
+    <script src="vue.js"></script>
+    <script>
+        Vue.component('async-example', function (resolve, reject) {
+            setTimeout(function () {
+                // 向 `resolve` 回调传递组件定义
+                resolve({
+                    template: '<div>I am async!</div>'
+                })
+            }, 1000)
+        })
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+
+                }
+            }
+        })
+    </script>
+</body>
+</html>

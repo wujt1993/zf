@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">
+        <anchored-heading :level="1">
+            jjjj
+        </anchored-heading>
+    </div>
+
+    <script src="vue.js"></script>
+    <script type="text/x-template" id="anchored-heading-template">
+        <h1 v-if="level === 1">
+            <slot></slot>
+        </h1>
+        <h2 v-else-if="level === 2">
+            <slot></slot>
+        </h2>
+        <h3 v-else-if="level === 3">
+            <slot></slot>
+        </h3>
+        <h4 v-else-if="level === 4">
+            <slot></slot>
+        </h4>
+        <h5 v-else-if="level === 5">
+            <slot></slot>
+        </h5>
+        <h6 v-else-if="level === 6">
+            <slot></slot>
+        </h6>
+    </script>
+    <script>
+        Vue.component('anchored-heading', {
+            template: '#anchored-heading-template',
+            props: {
+                level: {
+                    type: Number,
+                    required: true
+                }
+            }
+        })
+
+        Vue.component('anchored-heading-r', {
+            render: function (createElement) {
+                return createElement(
+                    'h' + this.level,   // 标签名称
+                    this.$slots.default // 子节点数组
+                )
+            },
+            props: {
+                level: {
+                    type: Number,
+                    required: true
+                }
+            }
+        })
+        
+        new Vue({
+            el: '#app',
+            data: {
+            }
+        })
+    </script>
+</body>
+
+</html>

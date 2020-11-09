@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">
+        <div id="hook-arguments-example" v-demo:foo="message"></div>
+        <p v-pin:[direction]="200">I am pinned onto the page at 200px to the left.</p>
+    </div>
+    <script src="vue.js"></script>
+    <script>
+        Vue.directive('demo', {
+            bind: function (el, binding, vnode) {
+                var s = JSON.stringify
+                el.innerHTML =
+                    'name: ' + s(binding.name) + '<br>' +
+                    'value: ' + s(binding.value) + '<br>' +
+                    'expression: ' + s(binding.expression) + '<br>' +
+                    'argument: ' + s(binding.arg) + '<br>' +
+                    'modifiers: ' + s(binding.modifiers) + '<br>' +
+                    'vnode keys: ' + Object.keys(vnode).join(', ')
+            }
+        })
+
+        Vue.directive('pin', {
+            bind: function (el, binding, vnode) {
+                el.style.position = 'fixed'
+                var s = (binding.arg == 'left' ? 'left' : 'top')
+                el.style[s] = binding.value + 'px'
+            }
+        })
+
+        new Vue({
+            el: '#app',
+            data: {
+                message: 'hello!',
+                direction: 'left'
+            }
+        })
+    </script>
+</body>
+
+</html>

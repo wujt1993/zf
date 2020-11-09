@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        {{count}}
+        <button-counter v-model="count"></button-counter>
+        <alert-box>
+            hello
+        </alert-box>
+        <component :is="componentId"></component>
+    </div>
+    <script src="vue.js"></script>
+    <script>
+        
+        Vue.component("alert-box", {
+            name: 'alert-box',
+            template: `
+                <div class="alert-box">
+                    error
+                    <slot></slot>
+                </div>
+            `
+        })
+
+        Vue.component('button-counter',{
+            props: ['value'],
+            name: 'button-counter',
+            computed: {
+                count: {
+                    get() {
+                        return this.value
+                    },
+                    set(val) {
+                        this.$emit("input", val)
+                    }
+                }
+            },
+            template: `
+                <button @click="count++">You clicked me {{ count }} times.</button>
+            `
+        })
+        let vm = new Vue({
+            el: "#app",
+            data() {
+                return {
+                    count: 0,
+                    componentId: 'alert-box'
+                }
+                
+            },
+            methods: {
+            }
+        })
+    </script>
+</body>
+</html>

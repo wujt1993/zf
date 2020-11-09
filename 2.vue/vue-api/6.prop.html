@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <blog-post post-title="hello title"></blog-post>
+    </div>
+    <script src="vue.js"></script>
+    <script>
+        Vue.component('blog-post', {
+            // 在 JavaScript 中是 camelCase 的
+            props: ['postTitle'],
+            template: '<h3>{{ postTitle }}</h3>'
+        })
+        let vm = new Vue({
+            el: "#app",
+            data() {
+                return {
+                }
+            },
+            methods: {
+            }
+        })
+    </script>
+</body>
+</html>
