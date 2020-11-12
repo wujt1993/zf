@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "client:dev": "webpack-dev-server",
-    "client:build": "webpack"
+    "client:dev": "webpack-dev-server --config ./build/webpack.client.js",
+    "client:build": "webpack --config ./build/webpack.client.js",
+    "server:build": "webpack --config ./build/webpack.server.js",
+    "run-all": "concurrently \"npm run client:build -- --watch\" \"npm run server:build -- --watch\""
   },
   "keywords": [],
   "author": "",
@@ -13,6 +15,7 @@
   "dependencies": {
     "koa": "^2.13.0",
     "koa-router": "^10.0.0",
+    "koa-static": "^5.0.0",
     "vue": "^2.6.12",
     "vue-server-renderer": "^2.6.12"
   },
