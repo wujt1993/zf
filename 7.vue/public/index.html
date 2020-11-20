@@ -6,6 +6,26 @@
     <title>Document</title>
 </head>
 <body>
+    <div id="app">{{arr}}</div>
     <script src="../dist/vue.js"></script>
+    <!-- <script src="../node_modules/vue/dist/vue.js"></script> -->
+    <script>
+        let vm = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    age: 7,
+                    name: 'kinth',
+                    address: {
+                        province: 'gd',
+                        city: 'gz'
+                    },
+                    employee: [{name: 'xxx', no: 1},{name: 'yyy', no: 2},'z']
+                }
+            }
+        })
+        vm._data.employee.push({name:"aaa",no:3})
+        console.log(vm._data)
+    </script>
 </body>
 </html>
