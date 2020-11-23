@@ -6,7 +6,10 @@
     <title>Document</title>
 </head>
 <body>
-    <div id="app">{{arr}}</div>
+    <div id="app" name='app' a=1>
+        <h1>vue</h1>
+        <p style="color:red">{{employee}}</p>
+    </div>
     <script src="../dist/vue.js"></script>
     <!-- <script src="../node_modules/vue/dist/vue.js"></script> -->
     <script>
@@ -24,8 +27,11 @@
                 }
             }
         })
+        vm._data.name = 'zf';
+        
         vm._data.employee.push({name:"aaa",no:3})
-        console.log(vm._data)
+        // console.log(vm)
+        // console.log(vm.$options.data())
     </script>
 </body>
 </html>

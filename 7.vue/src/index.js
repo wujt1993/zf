@@ -1,11 +1,13 @@
-import {initMixin} from "./init"
+
+import {initMixin} from './init.js'
+
 function Vue(options) {
-    //vue初始化
+
+    //初始化vue
     this._init(options);
 }
 
-initMixin(Vue)
+initMixin(Vue); //给原型上添加_init方法，初始化vue
 
-
-
+//导出Vue构造函数
 export default Vue;

@@ -8,11 +8,45 @@
 - rollup-plugin-babel: babel 与 rollup 桥梁
 - cross-env：设置环境变量
 
-### 二、vue初始化操作
-#### 1、数据劫持
+### 二、Vue响应式原理
+
+#### 1、导出Vue构造函数
+
+#### 2、初始化vue (_init)
+- vm.$options = options
+
+#### 3、初始化数据 (initState)
+- 数据来源：props 、 methods 、 data 、 computed 、watch
+- initData(vm)
+
+#### 4、数据劫持
 ```
-vue2 使用 Object.defineProperty对数据劫持。 如果数据的层次过多 需要递归的去解析对象中的属性，依次增加set和get方法，因此vue2性能会差点
+    vue如果数据的层次过多 需要递归的去解析对象中的属性，依次增加set和get方法,因此vue2 性能较差
 ```
-- 基本类型：不做处理
-- 数组类型：监听会影响数组长度的方法， push、pop、unshift 、shift 、 splice 、sort 、reserve，（arr.lenght=10并不会检测到数组变化，vue3解决了这问题） 
-- 对象类型：监听每个元素
+- 普通数据 （不做处理）
+- 对象：遍历每个元素，增加set和get方法，进行对象属性劫持(defineReactive)
+- 数组：不对索引劫持，对（push、pop、unshift、shift、splice、reserve、sort）方法及每个元素，进行对象属性劫持
+
+#### 5、数据代理
+- 将_data上的属性代理给 vm实例
+
+### 三、模板编译
+#### 1、页面挂载(vm.$mount(vm.$options.el))
+- 是否有 options.render
+- 没有options.render 通过 template = options.template || document.querySelector(options.el), 生成render 函数
+
+#### 2、将template编译成render函数
+```
+    ast语法树：用对象描述原生语法信息
+    虚拟dom：用对象描述dom节点信息
+```
+#### 1）解析template中标签和内容（不断截取template 直到template为空）
+- 获取 '<' 的位置 textEnd
+- textEnd == 0 ? 标签 ： 文本
+
+- parseStartTag: 获取开始标签 tagName、attrs
+- start(tagName, attrs) 处理开始标签
+
+- charts(text) 文本
+
+- end(tagName) 处理结束标签
