@@ -40,13 +40,20 @@
     ast语法树：用对象描述原生语法信息
     虚拟dom：用对象描述dom节点信息
 ```
-#### 1）解析template中标签和内容（不断截取template 直到template为空）
+##### 1）解析template中标签和内容（不断截取template 直到template为空）
 - 获取 '<' 的位置 textEnd
 - textEnd == 0 ? 标签 ： 文本
-
 - parseStartTag: 获取开始标签 tagName、attrs
+
+##### 2）构建ast语法树
 - start(tagName, attrs) 处理开始标签
-
 - charts(text) 文本
-
 - end(tagName) 处理结束标签
+
+#### 3) 将ast语法树转成 render函数字符串
+```
+    <div style="color:red">hello {{name}} <span></span></div>
+    render(){    
+        return _c('div',{style:{color:'red'}},_v('hello'+_s(name)),_c('span',undefined,''))
+    } 
+```

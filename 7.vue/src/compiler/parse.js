@@ -4,17 +4,53 @@ const startTagOpen = new RegExp(`^<${qnameCapture}`); // 标签开头的正则 �
 const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`); // 匹配标签结尾的 </div>
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/; // 匹配属性的
 const startTagClose = /^\s*(\/?)>/; // 匹配标签结束的 >
-const defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g; //{{name}}
 
 
+
+let root = null;
+let currentParent = null;
+let stack = [];
+const ELEMENT_TYPE = 1;
+const TEXT_TYPE = 3
+function createASTElement (tagName,attrs){
+    return {
+        type: ELEMENT_TYPE,
+        tag: tagName,
+        attrs,
+        children: [],
+        parent: null
+    }
+}
 function start(tagName, attrs) {
-    console.log('start:',tagName, attrs)
+    let element = createASTElement(tagName, attrs);
+    if(root == null) {
+        root = element;
+    }
+    element.parent = currentParent;
+    currentParent = element;
+    stack.push(element);
 }
 function chars(text) {
-    console.log('chars:',text)
+    text = text.replace(/\s/g,'');
+    if(text){
+        currentParent.children.push({
+            text,
+            type:TEXT_TYPE
+        })
+    }
 }
 function end(tagName) {
-    console.log('end:',tagName)
+    let element;
+    if(stack.length == 0 || (element = stack.pop()).tag !== tagName){
+        throw Error('标签名不匹配')
+    }
+
+    let currentParent = stack[stack.length - 1];
+    if(currentParent) {
+        currentParent.children.push(element);
+        element.parent = currentParent;
+    }
+    
 }
 export function parseHTML(html) {
     while(html) {
@@ -33,11 +69,20 @@ export function parseHTML(html) {
             }
             
         }
-        if(textEnd > 0){
-            let text = html.substring(0, textEnd);
-            advance(text.length);
-            chars(text); // 3解析文本
+
+        let text;
+        if(textEnd >= 0){
+            text = html.substring(0,textEnd);
         }
+        if(text){
+            advance(text.length);
+            chars(text);
+        }
+        // if(textEnd > 0){
+        //     let text = html.substring(0, textEnd);
+        //     advance(text.length);
+        //     chars(text); // 3解析文本
+        // }
 
 
 
@@ -69,4 +114,5 @@ export function parseHTML(html) {
             }
         }
     }
+    return root;
 }
