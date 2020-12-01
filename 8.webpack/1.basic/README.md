@@ -88,3 +88,17 @@
     3.要想速度快 优先选择cheap
     4.折中的选择就是 hidden-source-map
 ```
+
+#### 8、引入第三方插件
+
+- 直接引用 (比较麻烦，每次都要引)
+- 通过插件引用（无法在全局下使用）
+- 通过 expose-loader ，将插件暴露到全局作用域下
+- externals : webpack打包时不加入(适用于有cdn引入的)
+- html-webpack-externals-plugin: 自动引入外链cdn
+
+#### 9、watch 自动编译
+
+#### 10、拷贝文件copy-webpack-plugin
+
+#### 11、清空文件夹

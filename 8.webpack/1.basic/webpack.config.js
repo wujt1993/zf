@@ -1,25 +1,54 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
-console.log('webpack', process.env.NODE_ENV)
+const HtmlWebpackExternalssPlugin = require("html-webpack-externals-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const {CleanWebpackPlugin} = require("clean-webpack-plugin");
+// console.log('webpack', process.env.NODE_ENV)
 module.exports = (env) => {
-    console.log(env)
+    // console.log(env)
     return ({
         mode: 'development',
         entry: './src/index.js',
         devtool: 'cheap-source-map',
+        watch: true,
+        watchOptions: {
+            ignored: /node_moudles/,//不监听此文件夹
+            aggregateTimeout: 300,//监听到变化后，等300ms再执行，默认300
+            poll: 1000,//1000次/秒检测
+        },
         output: {
-            filename: 'mian.js',
+            filename: 'mian.[hash:10].js',
             path: path.resolve(__dirname, 'dist')
         },
         devServer: {
             contentBase: path.resolve(__dirname, 'static'),
             open: true,
             writeToDisk: true,
-            port: 3000
+            port: 3000,
+            proxy: {
+                // '/api': 'http://localhost:8081',
+                "/api": {
+                    target: 'http://localhost:8081',
+                    changeOrigin: true,
+                    pathRewrite:{"^/api":""}        
+                }     
+            }
+        },
+        externals: {
+            jquery: '$',
         },
         module: {
             rules: [
+                { test: require.resolve('jquery'),
+                    loader: 'expose-loader',
+                    options: {
+                        exposes: {
+                            globalName: '$',
+                            // override: true
+                        }
+                    }
+                },
                 { test: /\.txt$/, use: 'raw-loader' },
                 { test: /\.css/, use: ['style-loader', 'css-loader'] },
                 { test: /\.scss/, use: ['style-loader', 'css-loader', 'sass-loader'] },
@@ -52,6 +81,28 @@ module.exports = (env) => {
             }),
             new webpack.DefinePlugin({
                 'process.env.NODE_ENV': "'production'"
+            }),
+            new webpack.ProvidePlugin({
+                $: 'jquery'
+            }),
+            new HtmlWebpackExternalssPlugin({
+                externals: [
+                    {
+                        module: 'jquery',
+                        entry: 'https://cdn.bootcss.com/jquery/3.4.1/jquery.js',
+                        global: '$'
+                    }
+                ]
+                
+            }),
+            new CopyWebpackPlugin({
+                patterns: [{
+                    from: path.resolve(__dirname, 'src/static'),
+                    to: path.resolve(__dirname, 'dist/static')
+                }]
+            }),
+            new CleanWebpackPlugin({
+                cleanOnceBeforeBuildPatterns: ['**/*']
             })
         ]
     })

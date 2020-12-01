@@ -9,4 +9,7 @@
 //     console.log(res)
 // })
 
-console.log('index.js',process.env.NODE_ENV);
+// console.log('index.js',process.env.NODE_ENV);
+
+// const $ = require("jquery");
+// console.log($)
