@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .hhhh {
+            margin: 20px
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <script src="node_modules/react/umd/react.development.js"></script>
+    <script src="node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="node_modules/babel-standalone/babel.js"></script>
+    <script type="text/babel">
+        //1、使用表达式 {}
+        let name = 'jsx 进阶使用';
+        let count = 1;
+
+        //2、使用函数
+        function version() {
+            return '1.0'
+        }
+
+
+        let linkUrl = "https:www.baidu.com";
+        let styleObj = {color: 'red',fontSize: '20px',display:'block'};
+        let className = "hhhh";
+        let myDom = (
+            <div>
+                <h1>{name}</h1>
+                <h2>{version()}</h2>
+                <h3>{count++}</h3>
+                <p> {/*3、三目运算*/} 随机数： {Math.random() > 0.5 ? '大' : '小'}</p>
+                {/*设置属性*/}
+                <a href={linkUrl} style={styleObj}>百度一下</a>
+                {/*注意在jsx 不能使用class 这个属性 因为class是js的关键字   className*/}
+                <div className={className}>className</div>
+            </div>
+        );
+        ReactDOM.render(myDom, document.getElementById('app'));
+    </script> 
+</body>
+
+</html>

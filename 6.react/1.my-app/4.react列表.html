@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script src="node_modules/react/umd/react.development.js"></script>
+    <script src="node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="node_modules/babel-standalone/babel.js"></script>
+    <script type="text/babel">
+        let arr = ['吃饭','睡觉','打豆豆'];
+        let arrDom1 = arr.map((item ,index)=>{
+            return <p key={index} onClick={()=>{console.log(item)}}>{item}</p>
+        });
+        let arrDom2 = [];
+        for(let key in arr) {
+            arrDom2.push(<p key={key}>{arr[key]}</p>)
+        }
+        let myDom = (
+            <div>
+                <h1>{arrDom1}</h1>
+                ===================================================================
+                <h2>{arrDom2}</h2>
+            </div>
+        )
+        ReactDOM.render(myDom, document.getElementById('app'));
+    </script> 
+</body>
+
+</html>

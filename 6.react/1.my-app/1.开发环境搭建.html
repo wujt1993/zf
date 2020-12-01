@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script src="node_modules/react/umd/react.development.js"></script>
+    <script src="node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="node_modules/babel-standalone/babel.js"></script>
+    <script type="text/babel">
+        //npm install react: react 核心文件
+        //npm install react-dome: 渲染页面dom节点
+        //npm install babel-standalone: es6 转es5
+        let myDom = <h1>hello react</h1>;
+        ReactDOM.render(myDom, document.getElementById('app'));
+    </script> 
+</body>
+
+</html>
