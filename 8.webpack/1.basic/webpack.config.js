@@ -3,15 +3,25 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 const HtmlWebpackExternalssPlugin = require("html-webpack-externals-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const {CleanWebpackPlugin} = require("clean-webpack-plugin");
-// console.log('webpack', process.env.NODE_ENV)
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const OptimizeCssAssetsWebpackPlugin = require("optimize-css-assets-webpack-plugin");
+const TerserPlugin = require('terser-webpack-plugin');
+// const PostCssPresetEnv = require("postcss-preset-env");
+// console.log('webpack', process.env.NODE_ENV);
 module.exports = (env) => {
     // console.log(env)
     return ({
         mode: 'development',
         entry: './src/index.js',
+        optimization: {
+            minimize: true,
+            minimizer: [
+                new TerserPlugin()
+            ]
+        },
         devtool: 'cheap-source-map',
-        watch: true,
+        // watch: true,
         watchOptions: {
             ignored: /node_moudles/,//不监听此文件夹
             aggregateTimeout: 300,//监听到变化后，等300ms再执行，默认300
@@ -19,7 +29,8 @@ module.exports = (env) => {
         },
         output: {
             filename: 'mian.[hash:10].js',
-            path: path.resolve(__dirname, 'dist')
+            path: path.resolve(__dirname, 'dist'),
+            publicPath: '/',
         },
         devServer: {
             contentBase: path.resolve(__dirname, 'static'),
@@ -31,8 +42,8 @@ module.exports = (env) => {
                 "/api": {
                     target: 'http://localhost:8081',
                     changeOrigin: true,
-                    pathRewrite:{"^/api":""}        
-                }     
+                    pathRewrite: { "^/api": "" }
+                }
             }
         },
         externals: {
@@ -40,7 +51,8 @@ module.exports = (env) => {
         },
         module: {
             rules: [
-                { test: require.resolve('jquery'),
+                {
+                    test: require.resolve('jquery'),
                     loader: 'expose-loader',
                     options: {
                         exposes: {
@@ -50,7 +62,27 @@ module.exports = (env) => {
                     }
                 },
                 { test: /\.txt$/, use: 'raw-loader' },
-                { test: /\.css/, use: ['style-loader', 'css-loader'] },
+                {
+                    test: /\.css/, use: [MiniCssExtractPlugin.loader, 'css-loader',
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            postcssOptions: {
+                                plugins: [
+                                    "postcss-preset-env"
+                                ],
+                            },
+                        }
+
+                    },
+                    {
+                        loader: 'px2rem-loader',
+                        options: {
+                            remUnit: 75,
+                            remPrecesion: 8
+                        }
+                    }]
+                },
                 { test: /\.scss/, use: ['style-loader', 'css-loader', 'sass-loader'] },
                 { test: /\.less/, use: ['style-loader', 'css-loader', 'less-loader'] },
                 {
@@ -59,8 +91,10 @@ module.exports = (env) => {
                         loader: 'url-loader', // file-loader的加强版，当图片的大小小于limit时，转成base64
                         options: {
                             esModule: false,//不采用es6模式，require取值不需要取default
-                            name: '[hash:10].[ext]',
-                            limit: 8 * 1024 // 8k
+                            name: 'images/[name].[hash:10].[ext]',
+                            limit: 1 * 1024, // 1k
+                            // outputPath: 'images',
+                            // publicPath: '/images'
                         }
                     }]
                 },
@@ -77,7 +111,11 @@ module.exports = (env) => {
         },
         plugins: [
             new HtmlWebpackPlugin({
-                template: './src/index.html'
+                template: './src/index.html',
+                minify: {
+                    collapseWhitespace: true,
+                    removeComments: true
+                }
             }),
             new webpack.DefinePlugin({
                 'process.env.NODE_ENV': "'production'"
@@ -93,17 +131,21 @@ module.exports = (env) => {
                         global: '$'
                     }
                 ]
-                
+
             }),
-            new CopyWebpackPlugin({
-                patterns: [{
-                    from: path.resolve(__dirname, 'src/static'),
-                    to: path.resolve(__dirname, 'dist/static')
-                }]
-            }),
+            // new CopyWebpackPlugin({
+            //     patterns: [{
+            //         from: path.resolve(__dirname, 'src/static'),
+            //         to: path.resolve(__dirname, 'dist/static')
+            //     }]
+            // }),
             new CleanWebpackPlugin({
                 cleanOnceBeforeBuildPatterns: ['**/*']
-            })
+            }),
+            new MiniCssExtractPlugin({
+                filename: 'css/mian.[hash:10].css'
+            }),
+            new OptimizeCssAssetsWebpackPlugin()
         ]
     })
 }

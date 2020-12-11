@@ -102,3 +102,17 @@
 #### 10、拷贝文件copy-webpack-plugin
 
 #### 11、清空文件夹
+
+### 三、生产环境
+
+#### 1、css 提取
+- mini-css-extract-plugin
+
+#### 2、css 兼容
+- postcss-loader
+- postcss-preset-env
+
+#### 3、css、js、html 压缩
+- optimize-css-assets-webpack-plugin是一个优化和压缩CSS资源的插件
+- terser-webpack-plugin是一个优化和压缩JS资源的插件
+- new HtmlWebpackPlugin({template: './src/index.html',minify: {  collapseWhitespace: true,removeComments: true}}),

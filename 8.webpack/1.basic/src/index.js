@@ -1,3 +1,4 @@
+import 'lib-flexible/flexible.js'
 // const sum = (a,b) => {
 //     return a+b
 // }
@@ -13,3 +14,10 @@
 
 // const $ = require("jquery");
 // console.log($)
+
+import './static/index.css'
+// console.log(1+2)
+function a() {
+    return 1
+}
+console.log(a())
