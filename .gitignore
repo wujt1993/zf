@@ -9,3 +9,8 @@
 /7.vue/dist
 /8.webpack/1.basic/dist
 /6.react/1.my-app/node_modules
+/8.webpack/4.flow/node_modules
+/8.webpack/3.ast/node_modules
+/8.webpack/2.bundle/node_modules
+/8.webpack/5.loader/node_modules
+/6.react/1.basic/node_modules
