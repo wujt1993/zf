@@ -1,0 +1,10 @@
+body {
+    background: #61214f;
+}
+
+#app {
+    background-image: url(./img/logo.png) ;
+    background-size: contain;
+    width: 250px;
+    height: 250px;
+}

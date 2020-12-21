@@ -1,8 +1,9 @@
+// const {runLoaders} = require("loader-runner");
 const {runLoaders} = require("./loader-runner");
 const path = require("path");
 const fs = require("fs");
 const filePath = path.resolve(__dirname, 'src', "index.js");
-let request = `-!inline-loader1!inline-loader2!${filePath}`;
+let request = `inline-loader1!inline-loader2!${filePath}`;
 let parts = request.replace(/^-?!+/g, "").split("!");
 let resource = parts.pop();
 let resolveLoader = (loader) => path.resolve(__dirname, 'loaders2', loader);
@@ -64,7 +65,7 @@ runLoaders({
     context: {name:'zhufeng'},
 	readResource: fs.readFile.bind(fs)
 }, function(err, result) {
-    console.log(err);
-    console.log(result);
+    // console.log(err);
+    console.log(result)
 })
 
