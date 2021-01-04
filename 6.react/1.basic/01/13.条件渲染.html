@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script src="../node_modules/react/umd/react.development.js"></script>
+    <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="../node_modules/babel-standalone/babel.js"></script>
+    <script type="text/babel">
+        // 条件渲染是什么   ---  根据状态的变化只渲染其中的一部分
+        // 1.if语句    jsx中不允许有if
+        class ClassCompent extends React.Component{
+            constructor(props) {
+                super(props);
+                this.state = {
+                    flag: true
+                }
+            }
+            setFlag() {
+                this.setState({
+                    flag: !this.state.flag
+                })
+            }
+            render() {
+                let text = "";
+                if(this.state.flag) {
+                    text = "hello"
+                }else {
+                    text = "hi"
+                }
+                return (
+                    <div>
+
+                        <button onClick={()=>{this.setFlag()}}>点击</button>
+                        <div>
+                            {text}　{this.state.flag ? '哈哈哈': '呜呜呜'}
+                        </div>
+                        
+                    </div>
+                )
+            }
+        }
+        
+        ReactDOM.render(<ClassCompent></ClassCompent>, document.getElementById("app"))
+    </script>
+</body>
+
+</html>

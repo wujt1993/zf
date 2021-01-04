@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script src="../node_modules/react/umd/react.development.js"></script>
+    <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="../node_modules/babel-standalone/babel.js"></script>
+    <script type="text/babel">
+        let num = 1;
+        let flag = true;
+        function fn(name) {
+            return name;
+        }
+        // 渲染数组
+        let arr=[
+            <p>新闻列表1</p>, <p>新闻列表2</p>
+        ];
+        let styleObj = {color: 'red', 'font-size': '30px'};
+        let url ="https://www.baidu.com";
+        let className = "react-div";
+        let myDom = (
+            <div>
+                <div style={styleObj}>num：{num+1}</div>
+                <div>num：{num}</div>
+                <div>fn: {fn("react")}</div>
+                <div>flag: {flag ? 'true': 'false'}</div>
+                <div>{arr}</div>
+                <div className={className}><a href={url}>百度一下</a></div>
+            </div>
+        )
+        ReactDOM.render(myDom, document.getElementById("app"));
+    </script>
+</body>
+</html>

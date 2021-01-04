@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script src="../node_modules/react/umd/react.development.js"></script>
+    <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="../node_modules/babel-standalone/babel.js"></script>
+    <script type="text/babel">
+        //组件： 1、函数组件/无状态组件 2、类组件
+        function ComA() {
+            return (
+                <div>hello 无状态组件</div>
+            )
+        }
+
+        function ComP() {
+            return (
+                <div>
+                    父组件
+                    <ComA></ComA>
+                </div>
+            )
+        }
+
+
+        //2、类组件
+        class ComClass extends React.Component{
+            render(){
+                return <div>类组件</div>
+            }
+        }
+        let myDom = (
+            <div>
+                <ComP></ComP>
+                <ComClass></ComClass>
+            </div>
+        )
+            
+        ReactDOM.render(myDom, document.getElementById("app"))
+    </script>
+</body>
+</html>

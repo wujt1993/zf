@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script src="../node_modules/react/umd/react.development.js"></script>
+    <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="../node_modules/babel-standalone/babel.js"></script>
+    <script type="text/babel">
+
+        function EffectHook() {
+            const [count, setCount] = React.useState(0);
+            React.useEffect(() => {
+                document.title = `You clicked ${count} times`;
+            });
+            return (
+                <div>
+                    <p>You clicked {count} times</p>
+                    <button onClick={() => setCount(count + 1)}>
+                        Click me
+                    </button>
+                </div>
+            );
+        }
+
+        function StateHook() {
+            const [count, setCount] = React.useState(0);
+            const [isOn, toggler] = React.useState(false);
+            return (
+                <div>
+                    <h1>count:{count}</h1>
+                    <div><button onClick={() => { setCount(count + 1) }}>add</button></div>
+                    <div><button onClick={() => { toggler(!isOn) }}>{!isOn ? 'on' : 'off'}</button></div>
+                </div>
+            )
+        }
+        class ClassCom extends React.Component {
+            constructor(props) {
+                super(props);
+            }
+            render() {
+                return (
+                    <div>
+                        {/*<StateHook></StateHook>*/}
+                        <EffectHook></EffectHook>
+                    </div>
+                )
+            }
+        }
+
+        ReactDOM.render(
+            <ClassCom />,
+            document.getElementById("app")
+        )
+    </script>
+</body>
+
+</html>

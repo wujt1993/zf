@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script src="../node_modules/react/umd/react.development.js"></script>
+    <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="../node_modules/babel-standalone/babel.js"></script>
+    <script src="../node_modules/prop-types/prop-types.js"></script>
+    <script type="text/babel">
+        // 1.无状态组件的props验证和 默认值
+        // 默认值 需要defaultProps
+        function FnCom(props) {
+            return (<div>
+                无状态组件 ---------------- name: {props.name}
+            </div>)
+        }
+        FnCom.defaultProps = {
+            name: '我是默认值'
+        }
+        // props验证  ---  验证传递进来的数据是否符合我们期望了类型或者要求  上线模式中请取消props
+        // 引用prop-types库   npm install --save prop-types
+        FnCom.propTypes = {
+            name: PropTypes.string,//验证name这个props传递进来的数据必须是number类型
+            // age: PropTypes.number.isRequired
+        }
+
+        // 2、类组件
+        class ClassCom extends React.Component{
+            static defaultProps = {
+                name: '我是类组件默认值'
+            }
+            render() {
+                return (
+                    <div>
+                        类组件 -------------------------- name: {this.props.name}
+                    </div>
+                )
+            }
+        }
+
+
+        let myDom = (
+            <div>
+                <FnCom name={"hhh"}></FnCom>
+                <ClassCom></ClassCom>
+            </div>
+        )
+        ReactDOM.render(myDom, document.getElementById("app"))
+    </script>
+</body>
+
+</html>

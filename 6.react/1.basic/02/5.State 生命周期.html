@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script src="../node_modules/react/umd/react.development.js"></script>
+        <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+        <script src="../node_modules/babel-standalone/babel.js"></script>
+        <script type="text/babel">
+            class Clock extends React.Component{
+                constructor(props) {
+                    super(props);
+                    this.state = {
+                        date: new Date()
+                    }
+                }
+
+                componentDidMount() {
+                    this.timer = setInterval(()=>this.tick(), 1000)
+                }
+
+                componentWillUnmount() {
+                    clearInterval(this.timer)
+                }
+
+                tick() {
+                    this.setState({
+                        date: new Date()
+                    })
+                }
+
+                render() {
+                    return (
+                        <div>
+                            <h1>hello react</h1>
+                            <h2>{this.state.date.toLocaleString()}</h2>
+                        </div>
+                    )
+                }
+            }
+
+            ReactDOM.render(
+                <Clock/>,
+                document.getElementById("app")
+            )
+        </script>
+    </body>
+</html>

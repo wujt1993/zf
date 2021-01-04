@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script src="../node_modules/react/umd/react.development.js"></script>
+        <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+        <script src="../node_modules/babel-standalone/babel.js"></script>
+        <script type="text/babel">
+            class InputCom extends React.Component{
+                constructor(props) {
+                    super(props);
+                }
+
+                render() {
+                    return (
+                        <div>
+                            <input value={this.props.value} type="text" onChange={(e)=>{this.props.inputChange(e.target.value)}}/>
+                        </div>
+                    )
+                }
+            }
+            class ClassCom extends React.Component{
+                constructor(props) {
+                    super(props);
+                    this.state = {
+                        value: '',
+                        type: 's'
+                    }
+                }
+                inputChange1(value) {
+                    this.setState({
+                        type: 's',
+                        value: value
+                    })
+                }
+
+                inputChange2(value) {
+                    this.setState({
+                        type: 'c',
+                        value: value
+                    })
+                }
+
+                render() {
+                    let value1 = this.state.type === 's' ? this.state.value : this.state.value - 0 + 32;
+                    let value2 = this.state.type === 'c' ? this.state.value : this.state.value - 32;
+                    return (
+                        <div>
+                            <InputCom type="s" value={value1} inputChange={this.inputChange1.bind(this)}></InputCom>    
+                            <InputCom type="c" value={value2} inputChange={this.inputChange2.bind(this)}></InputCom>    
+                        </div>
+                    )
+                }
+            }
+            ReactDOM.render(
+                <ClassCom/>,
+                document.getElementById("app")
+            )
+        </script>
+    </body>
+</html>

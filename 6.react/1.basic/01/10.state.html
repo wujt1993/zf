@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script src="../node_modules/react/umd/react.development.js"></script>
+    <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="../node_modules/babel-standalone/babel.js"></script>
+    <script type="text/babel">
+        // state 状态
+        // state和props的区别
+        // props是组件对外的接口  state是组件对内的接口
+        // 声明式渲染  ---  一切的数据改变操作都不用我们关心 只需要我们生命好数据  react就会自动的对于数据进行相应的改变
+        // 主要区别：
+        // 1.state是可变的 
+        // 2.props对于当前页面的组件来说  他是只读 如果我们想修改props中的数据 那么我们修改传递给当前组件数据的父组件中的内容
+        class ClassCom extends React.Component{
+
+            constructor(props) {
+                super(props);
+                this.state = {
+                    num: 1,
+                    msg: '<h1>hello  dangerouslySetInnerHTML</h1>'
+                }
+            }
+
+            add() {
+                this.setState({
+                    num: (this.state.num + 1)
+                },()=>{
+
+                    console.log("~~~~~~~~~~~数据已改变->num:" + this.state.num);
+                    console.log("----------------------------------------------------");
+
+                }) //此方法为异步方法
+
+                console.log("~~~~~~~~~~~数据未改变" + this.state.num);
+                
+            }
+
+            render() {
+                return (
+                    <div>
+                        <button onClick={()=>this.add()}>add{this.state.num}</button>
+                        <div dangerouslySetInnerHTML={{__html:this.state.msg}}></div>
+                    </div>
+                )
+            }
+        }
+        ReactDOM.render(<ClassCom></ClassCom>, document.getElementById("app"))
+    </script>
+</body>
+
+</html>

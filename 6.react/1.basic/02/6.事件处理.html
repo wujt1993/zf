@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script src="../node_modules/react/umd/react.development.js"></script>
+        <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+        <script src="../node_modules/babel-standalone/babel.js"></script>
+        <script type="text/babel">
+
+            class ClassCom extends React.Component{
+                constructor(props) {
+                    super(props);
+                    this.state = {
+                        name: 'qf'
+                    }
+                    this.fn4 = this.fn4.bind(this)
+                }
+
+                fn1() {
+                    console.log(this.state.name)
+                }
+
+                fn2 = () => {
+                    console.log(this.state.name)
+                }
+
+                fn3() {
+                    console.log(this.state.name)
+                }
+
+                fn4() {
+                    console.log(this.state.name)
+                }
+
+                fn5(type, e) {
+                    console.log(type)
+                    console.log(e)
+                }
+                render() {
+                    return (
+                        <div>
+                            <h1>this指向</h1>
+                            <div>
+                                <button onClick={this.fn1.bind(this)}>bind绑定</button>
+                                <button onClick={this.fn4}>构造函数bind绑定</button>
+                                <button onClick={this.fn2}>箭头函数</button>
+                                <button onClick={()=>{this.fn3()}}>回调使用箭头函数</button>
+                                
+                            </div>
+                            <h1>函数传参</h1>
+                            <div>
+                                <button onClick={this.fn5.bind(this, 'bind')}>bind传参</button>
+                                <button onClick={(e)=>this.fn5('arrow', e)}>箭头函数传参</button>
+
+                            </div>
+                        </div>
+                    )
+                }
+            }
+
+            ReactDOM.render(
+                <ClassCom/>,
+                document.getElementById("app")
+            )
+        </script>
+    </body>
+</html>

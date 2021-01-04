@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script src="../node_modules/react/umd/react.development.js"></script>
+    <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="../node_modules/babel-standalone/babel.js"></script>
+    <script type="text/babel">
+        let arr = ['吃饭','睡觉','打豆豆'];
+        let flag = true;
+        let index = 0;
+        let myDom1 = arr.map((item,index)=>{
+            return <p key={index}>{item}</p>
+        });
+        function fn() {
+            let newArr = [];
+            for(let i = 0, len = arr.length; i < len; i++){
+                newArr.push(<h3 key={i}>{arr[i]}</h3>);
+            }
+            return newArr;
+        }
+        function create() {
+            return (<div>
+                <h1 onClick={()=>{flag=!flag;render()}}>map {flag?'收起':'展开'}</h1>
+                <div style={{display: flag? 'block': 'none'}}>
+                    {myDom1}
+                </div>
+                <h2>for in</h2>
+                <div>{fn()}</div>
+            </div>)
+        }
+        function render() {
+            ReactDOM.render(create(), document.getElementById("app"));
+        }
+        render();
+    </script>
+</body>
+</html>

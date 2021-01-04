@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script src="../node_modules/react/umd/react.development.js"></script>
+    <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="../node_modules/babel-standalone/babel.js"></script>
+    <script type="text/babel">
+        function FnCom(props) {
+            return (
+                <div>
+                    {
+                        props.arr.map(item => {
+                            return <p key={item.id}> {item.name}</p>
+                        })
+                    }
+                </div>
+            )
+        }
+
+        class ClassCom extends React.Component{
+            constructor(props) {
+                super(props);
+                this.state = {
+                    flag:  true,
+                    arr: [
+                        {id: 1, name: '吃饭'},
+                        {id: 2, name: '睡觉'},
+                        {id: 3, name: '打豆豆'},
+                    ]
+                }
+            }
+            render() {
+                return (
+                    <div>
+                        <div onClick={()=>{this.state.flag = !this.state.flag; render()}}>点击 {this.state.flag ? '收起' : '展开'}</div>
+                        <div style={{display: this.state.flag ? 'block': 'none'}}>
+                            <FnCom arr={this.state.arr}></FnCom>
+                        </div>
+                    </div>
+                )
+            }
+        }
+
+        function render() {
+            ReactDOM.render(<ClassCom></ClassCom>, document.getElementById("app"))
+        }
+        render();
+    </script>
+</body>
+
+</html>

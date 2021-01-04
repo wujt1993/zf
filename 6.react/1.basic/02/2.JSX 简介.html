@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script src="../node_modules/react/umd/react.development.js"></script>
+        <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+        <script src="../node_modules/babel-standalone/babel.js"></script>
+        <script type="text/babel">
+            const name = "react";
+            const user = {
+                age: 16,
+                name: 'react',
+            }
+            function formatName(user) {
+                return `user: ${user.name} --------- age: ${user.age}`
+            }
+            
+            const myDOM = (
+                <div>
+                    <h1>hello, {name}</h1>
+                    <h2>{formatName(user)}</h2>
+                    <div tabIndex="0" className="class-name"></div>
+                </div>
+            )
+
+            ReactDOM.render(myDOM, document.getElementById('app'));
+        </script>
+    </body>
+</html>

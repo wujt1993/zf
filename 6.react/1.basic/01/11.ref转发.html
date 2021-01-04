@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script src="../node_modules/react/umd/react.development.js"></script>
+    <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="../node_modules/babel-standalone/babel.js"></script>
+    <script type="text/babel">
+        // 转发 refs    react当中提供了一个ref的数据 （不能再无状态组件当中来进行使用  因为无状态组件没有实例）
+        // 表示当前组件的真正实例的引用  他会返回绑定当前属性的元素
+        // 标识组件内部的元素---方便我们查找
+
+        // react给我们3中方式进行ref的使用
+        // 1、字符串的方式
+        // 2、回调函数（推荐）
+        // 3.React.createRef()
+
+        class ClassCompent extends React.Component{
+            
+            constructor(props) {
+                super(props);
+                this.inputElem2 = React.createRef()
+            }
+            fn1() {
+                console.log(this.refs.inputElem.value)
+            }
+            fn2() {
+                console.log(this.inputElem1.value)
+            }
+            fn3() {
+                console.log(this.inputElem2.current.value)
+            }
+
+            render() {
+                return (
+                    <div>
+                        <div>
+                            <input ref="inputElem" />
+                            <button onClick={()=>this.fn1()}>提交</button>
+                        </div>
+                        <div>
+                            <input ref={(input)=>this.inputElem1=input} />
+                            <button onClick={()=>this.fn2()}>提交</button>
+                        </div>
+                        <div>
+                            <input ref={this.inputElem2} />
+                            <button onClick={()=>this.fn3()}>提交</button>
+                        </div>
+                    </div>
+                )
+            }
+
+
+        }
+        
+        ReactDOM.render(<ClassCompent></ClassCompent>, document.getElementById("app"))
+    </script>
+</body>
+
+</html>

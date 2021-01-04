@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script src="../node_modules/react/umd/react.development.js"></script>
+    <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+    <script src="../node_modules/babel-standalone/babel.js"></script>
+    <script type="text/babel">
+        let fnProps = {
+            name: '无状态组件',
+        }   
+        let classProps = {
+            name: '类组件'
+        }
+        function FnCom(props) {
+            return <h1>
+                {props.name}
+            </h1>
+        }
+
+        class ClassCom extends React.Component{
+            render() {
+                return <h2>
+                    {this.props.name}
+                </h2>
+            }
+        }
+        let myDom = (
+            <div>
+                <FnCom {...fnProps}></FnCom>
+                <ClassCom {...classProps}></ClassCom>  
+            </div>
+        )
+        ReactDOM.render(myDom, document.getElementById("app"))
+    </script>
+</body>
+</html>
