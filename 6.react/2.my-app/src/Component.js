@@ -1,5 +1,5 @@
 
-import {createDOM} from './react-dom'
+import {compareTwoVdom} from './react-dom'
 export let updateQueue = {
     updaters: [],
     isBatchingUpdate: false,
@@ -79,22 +79,30 @@ class Component {
     setState(partialState, callback) {
         this.updater.addState(partialState, callback);
     }
+
+
     forceUpdate() {
-        this.componentWillUpdate && this.componentWillUpdate()
-        let newVdom = this.render();
-        mountClassComponent(this, newVdom);
-        this.componentDidUpdate && this.componentDidUpdate()
+        this.componentWillUpdate && this.componentWillUpdate();
+        let newRenderVdom = this.render();
+        let oldRenderVdom = this.oldRenderVdom;
+        let parentNode = oldRenderVdom.dom.parentNode;
+        compareTwoVdom(parentNode, oldRenderVdom, newRenderVdom)
+        // let newVdom = this.render();
+        // updateClassComponent(this, newVdom);
+        this.componentDidUpdate && this.componentDidUpdate();
     }
+
+
     render() {
         throw new Error("需要实现子类")
     }
 }
 
 //更新类组件
-function mountClassComponent(classInstance, newVdom) {
-    let oldDOM = classInstance.dom;
-    let newDOM = createDOM(newVdom);
-    oldDOM.parentNode.replaceChild(newDOM, oldDOM);
-    classInstance.dom = newDOM;
-}
+// function updateClassComponent(classInstance, newVdom) {
+//     let oldDOM = classInstance.dom;
+//     let newDOM = createDOM(newVdom);
+//     oldDOM.parentNode.replaceChild(newDOM, oldDOM);
+//     classInstance.dom = newDOM;
+// }
 export default Component;

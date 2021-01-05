@@ -1,5 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from './react';
+import ReactDOM from './react-dom';
 
 class Counter extends React.Component {
     static defaultProps = {
@@ -54,8 +54,8 @@ class ChildCounter extends React.Component {
     componentDidMount() {
         console.log("ChildCounter 3.componentDidMount 组件渲染完成");
     }
-    componentWillReceive(newProps) {
-        console.log("ChildCounter 4.componentDidMount 组件渲染完成");
+    componentWillReceiveProps(newProps) {
+        console.log("ChildCounter 4.componentWillReceiveProps 父组件数据更新");
     }
     shouldComponentUpdate(nextProps, nextState) {
         let flag = nextProps.number % 3 === 0
