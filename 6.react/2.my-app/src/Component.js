@@ -25,7 +25,8 @@ class Updater {
         this.emitUpdate()
     }
 
-    emitUpdate() {
+    emitUpdate(newPrpos) {
+        this.nextProps = newPrpos;
         if(updateQueue.isBatchingUpdate) {
             updateQueue.add(this)
         }else{
@@ -33,9 +34,9 @@ class Updater {
         }
     }
     updateComponent() {
-        let {classInstance, pendingState} = this;
-        if(pendingState.length > 0) {
-            shouldUpdate(classInstance, this.getState())
+        let {classInstance, pendingState, nextProps} = this;
+        if(nextProps || pendingState.length > 0) {
+            shouldUpdate(classInstance, this.nextProps ,this.getState(nextProps))
             // classInstance.state = this.getState()
             // classInstance.forceUpdate();
             this.callbacks.forEach(cb => cb());
@@ -44,7 +45,7 @@ class Updater {
     }
 
     
-    getState() {
+    getState(nextProps) {
         let {classInstance, pendingState} = this;
         let {state} = classInstance;
         for(let i = 0; i < pendingState.length; i++) {
@@ -55,18 +56,33 @@ class Updater {
             state = {...state, ...nextState}
         }
         pendingState.length = 0
+        if(classInstance.constructor.getDerivedStateFromProps){
+            let partialState = classInstance.constructor.getDerivedStateFromProps(nextProps,classInstance.state );
+            if(partialState){
+                state={...state,...partialState};
+            }
+        }
         return state;
     }
 }
 
-function shouldUpdate(classInstance, nextState) {
-    classInstance.state = nextState;
-    if(classInstance.shouldComponentUpdate && !classInstance.shouldComponentUpdate(classInstance.props, nextState)) {
-        return
+function shouldUpdate(classInstance, nextProps , nextState) {
+    
+    let willUpdate = true;//是否要更新
+    if(classInstance.shouldComponentUpdate && !classInstance.shouldComponentUpdate(nextProps, nextState)) {
+        willUpdate = false
+    }
+    if(willUpdate && classInstance.componentWillUpdate) {
+        classInstance.componentWillUpdate();
     }
 
-    
-    classInstance.forceUpdate();
+    classInstance.state = nextState;
+
+    if(nextProps){
+        classInstance.props = nextProps;
+    }
+    if(willUpdate)
+        classInstance.updateComponent();
 }
 class Component {
     static isReactComponent = true;
@@ -82,16 +98,26 @@ class Component {
 
 
     forceUpdate() {
-        this.componentWillUpdate && this.componentWillUpdate();
+        let nextState = this.state;
+        let nextProps = this.props;
+        if(this.constructor.getDerivedStateFromProps) {
+            let partialStete = this.constructor.getDerivedStateFromProps(nextProps, nextState);
+            if(partialStete)
+                nextState = {...nextState, ...partialStete}
+        }
+        this.state = nextState;
+        this.updateComponent()
+    }
+    updateComponent() {
         let newRenderVdom = this.render();
         let oldRenderVdom = this.oldRenderVdom;
         let parentNode = oldRenderVdom.dom.parentNode;
-        compareTwoVdom(parentNode, oldRenderVdom, newRenderVdom)
+        compareTwoVdom(parentNode, oldRenderVdom, newRenderVdom);
+        this.oldRenderVdom = newRenderVdom;
         // let newVdom = this.render();
         // updateClassComponent(this, newVdom);
         this.componentDidUpdate && this.componentDidUpdate();
     }
-
 
     render() {
         throw new Error("需要实现子类")

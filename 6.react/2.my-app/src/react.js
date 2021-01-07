@@ -1,5 +1,6 @@
 
 import Component from './Component'
+import { wrapToVdom } from './util';
 function createElement(type, config, children) {
     if(config) {
         delete config.__self;
@@ -8,9 +9,11 @@ function createElement(type, config, children) {
 
     let props = {...config};
     if(arguments.length > 3) {
-        children = Array.prototype.slice.call(arguments, 2)
+        props.children = Array.prototype.slice.call(arguments, 2).map(wrapToVdom)
+    }else {
+        props.children = wrapToVdom(children)
     }
-    props.children = children
+    
     return {
         type,
         props

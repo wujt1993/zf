@@ -1,4 +1,5 @@
 
+import { REACT_TEXT } from './constants';
 import { addEvent } from './event'
 
 function render(vdom, container) {
@@ -12,12 +13,14 @@ function render(vdom, container) {
 }
 
 export function createDOM(vdom) {
-    if (typeof vdom === 'string' || typeof vdom === 'number') {
-        return document.createTextNode(vdom);
-    }
+    // if (typeof vdom === 'string' || typeof vdom === 'number') {
+    //     return document.createTextNode(vdom);
+    // }
     let { type, props } = vdom;
     let dom;
-    if (typeof type === 'function') {
+    if (type === REACT_TEXT) {
+        dom = document.createTextNode(props.content);
+    } else if (typeof type === 'function') {
         if (type.isReactComponent) {
             return mountClassComponent(vdom);
         }
@@ -27,7 +30,7 @@ export function createDOM(vdom) {
     }
 
     //2.将虚拟节点vdom 的属性赋值给dom
-    updateProps(dom, props);
+    updateProps(dom, {}, props);
     //3.将vdom上子元素挂载到dom上
     if (typeof props.children === 'string' || typeof props.children === 'number') {
         dom.textContent = props.children;
@@ -46,13 +49,20 @@ export function createDOM(vdom) {
 function mountClassComponent(vdom) {
     let { type, props } = vdom;
     let classInstance = new type(props);
-
+    vdom.classInstance = classInstance;
     classInstance.componentWillMount && classInstance.componentWillMount();
+    if (type.getDerivedStateFromProps) {
+        let partialState = type.getDerivedStateFromProps(classInstance.props, classInstance.state);
+        if (partialState) {
+            classInstance.state = { ...classInstance.state, ...partialState }
+        }
+    }
     let renderDOM = classInstance.render();
     classInstance.oldRenderVdom = vdom.oldRenderVdom = renderDOM;
     let dom = createDOM(renderDOM);
-
-    dom.componentDidMount = classInstance.componentDidMount.bind(classInstance);
+    if (classInstance.componentDidMount) {
+        dom.componentDidMount = classInstance.componentDidMount.bind(classInstance);
+    }
 
     classInstance.dom = dom;
     return dom;
@@ -78,7 +88,7 @@ function reconcileChildren(childVdom, parentDOM) {
 }
 
 //更新属性
-function updateProps(dom, newProps) {
+function updateProps(dom, oldProps, newProps) {
     for (let key in newProps) {
         if (key === 'children') continue;
         if (key === 'style') {
@@ -106,26 +116,67 @@ export function compareTwoVdom(parentDOM, oldVdom, newVdom, nextDOM) {
             parentDOM.appendChild(newDOM)
         }
         newDOM.componentDidMount && newDOM.componentDidMount();
-    } else if(oldVdom && !newVdom) {
+    } else if (oldVdom && !newVdom) {
         let currentDOM = findDOM(oldVdom);
-        if(currentDOM) {
+        if (currentDOM) {
             parentDOM.removeChild(currentDOM)
         }
         oldVdom.classInstance && oldVdom.classInstance.componentWillUnmount && oldVdom.classInstance.componentWillUnmount();
-    } else if(oldVdom && newVdom && oldVdom.type !== newVdom) {
+    } else if (oldVdom && newVdom && oldVdom.type !== newVdom.type) {
         let oldDOM = findDOM(oldVdom);
         let newDOM = createDOM(newVdom);
-        parentDOM.replaceChild(newDOM,oldDOM); 
+        parentDOM.replaceChild(newDOM, oldDOM);
         oldVdom.classInstance && oldVdom.classInstance.componentWillUnmount && oldVdom.classInstance.componentWillUnmount();
         newDOM.componentDidMount && newDOM.componentDidMount();
-    }else {
-        updateElement(oldVdom,newVdom);
+    } else {
+        updateElement(oldVdom, newVdom);
     }
 
 }
 
-function updateElement(oldVdom,newVdom) {
+function updateElement(oldVdom, newVdom) {
+    if (oldVdom.type === REACT_TEXT) {
+        let currentDOM = newVdom.dom = oldVdom.dom;
+        if (newVdom.props.content !== oldVdom.props.content) {
+            currentDOM.textContent = newVdom.props.content;
+        }
 
+    } else if (typeof oldVdom.type === 'string') {
+        let currentDOM = newVdom.dom = oldVdom.dom;
+        updateProps(currentDOM, oldVdom.props, newVdom.props);
+        updateChild(currentDOM, oldVdom.props.children, newVdom.props.children)
+    } else if (typeof oldVdom.type === 'function') {
+        if (oldVdom.type.isReactComponent) {
+            updateClassComponent(oldVdom, newVdom);
+        } else {
+            updateFunctionComponent(oldVdom, newVdom);
+        }
+    }
+}
+function updateFunctionComponent(oldVdom, newVdom) {
+    let parentDOM = findDOM(oldVdom).parentNode;
+    let { type, props } = newVdom;
+    let oldRenderVdom = oldVdom.oldRenderVdom;
+    let newRenderVdom = type(props);
+    compareTwoVdom(parentDOM, oldRenderVdom, newRenderVdom);
+    newVdom.oldRenderVdom = newRenderVdom;
+}
+function updateClassComponent(oldVdom, newVdom) {
+    let classInstance = newVdom.classInstance = oldVdom.classInstance;
+    newVdom.oldRenderVdom = oldVdom.oldRenderVdom;
+    classInstance.componentWillReceiveProps && classInstance.componentWillReceiveProps();
+    //触发组件的更新，要把新的属性传过来
+    classInstance.updater.emitUpdate(newVdom.props);
+
+}
+function updateChild(parentDOM, oldVChildren, newVChildren) {
+    oldVChildren = Array.isArray(oldVChildren) ? oldVChildren : [oldVChildren];
+    newVChildren = Array.isArray(newVChildren) ? newVChildren : [newVChildren];
+    let maxLength = Math.max(oldVChildren.length, newVChildren.length);
+    for (let i = 0; i < maxLength; i++) {
+        let nextDOM = oldVChildren.find((item, index) => index > i && item && item.dom);
+        compareTwoVdom(parentDOM, oldVChildren[i], newVChildren[i], nextDOM && nextDOM.dom)
+    }
 }
 
 function findDOM(vdom) {
