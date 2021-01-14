@@ -1,22 +1,99 @@
 
 import { REACT_TEXT } from './constants';
 import { addEvent } from './event'
-
+//TODO 有bug
+let hookStates = [];
+let hookIndex = 0;
+let scheduleUpdate;
 function render(vdom, container) {
+    mount(vdom, container)
+    scheduleUpdate = () => {
+        hookIndex = 0;
+        compareTwoVdom(container, vdom, vdom);
+    }
+}
+export function useContext(context) {
+    return context._currentValue
+}
+export function useMemo(factory,deps) {
+    if(hookStates[hookIndex]) {
+        let [lastMemo, lastDeps] = hookStates[hookIndex];
+        let same = deps.every((item, index)=>{return item === lastDeps[index]});
+        if(same) {
+            hookIndex++;
+            return lastMemo;
+        }else {
+            let newMemo = factory();
+            hookStates[hookIndex++] = [newMemo, deps];
+            return newMemo;
+        }
+    }else {
+        let newMemo = factory();
+        hookStates[hookIndex++] = [newMemo, deps];
+        return newMemo;
+    }
+}
+
+export function useCallback(callback,deps) {
+    if(hookStates[hookIndex]) {
+        let [lastCallback, lastDeps] = hookStates[hookIndex];
+        let same = deps.every((item, index)=>{return item === lastDeps[index]});
+        if(same) {
+            hookIndex++;
+            return lastCallback;
+        }else {
+            hookStates[hookIndex++] = [callback, deps];
+            return callback;
+        }
+    }else {
+        hookStates[hookIndex++] = [callback, deps];
+        return callback;
+    }
+}
+
+export function useReducer(reducer, initialState) {
+    hookStates[hookIndex] = hookStates[hookIndex] || (typeof initialState === 'function' ? initialState(): initialState);
+    let currentIndex = hookIndex;
+    function dispatch(action) {
+        let lastState = hookStates[currentIndex];//获取老状态
+        let nextState;
+        if(typeof action=== 'function'){
+            nextState=action(lastState);
+        }
+        if(reducer){
+            nextState = reducer(lastState,action);
+        }
+        hookStates[currentIndex]=nextState;
+        scheduleUpdate();//当状态改变后要重新更新应用
+    }
+    return [hookStates[hookIndex++], dispatch];
+}
+
+export function useState(initialState) {
+    // hookStates[hookIndex] = hookStates[hookIndex] || (typeof initialState === 'function' ? initialState() : initialState);
+    // let currentIndex = hookIndex;
+    // function setState(newState) {
+    //     if(typeof newState === 'function') newState = newState(hookStates[hookIndex]);
+    //     hookStates[currentIndex] = newState;
+    //     scheduleUpdate()
+    // }
+    // return [hookStates[hookIndex++], setState];
+    return useReducer(null, initialState)
+
+}
+
+function mount(vdom, container) {
     // 1.将虚拟节点vdom 转为真实节点 dom
     let dom = createDOM(vdom)
     // 4.将真实节点 dom 挂载到container
-
     container.appendChild(dom);
-
-    dom.componentDidMount && dom.componentDidMount();
 }
 
 export function createDOM(vdom) {
     // if (typeof vdom === 'string' || typeof vdom === 'number') {
     //     return document.createTextNode(vdom);
     // }
-    let { type, props } = vdom;
+    let { type, props, ref } = vdom;
     let dom;
     if (type === REACT_TEXT) {
         dom = document.createTextNode(props.content);
@@ -42,6 +119,9 @@ export function createDOM(vdom) {
         document.textContent = props.children ? props.children.toString() : '';
     }
     vdom.dom = dom;
+    if(ref) {
+        ref.current = dom;
+    }
     return dom;
 }
 
@@ -50,6 +130,9 @@ function mountClassComponent(vdom) {
     let { type, props } = vdom;
     let classInstance = new type(props);
     vdom.classInstance = classInstance;
+    if(type.contextType){
+        classInstance.context = type.contextType._currentValue;
+    }
     classInstance.componentWillMount && classInstance.componentWillMount();
     if (type.getDerivedStateFromProps) {
         let partialState = type.getDerivedStateFromProps(classInstance.props, classInstance.state);
@@ -115,7 +198,7 @@ export function compareTwoVdom(parentDOM, oldVdom, newVdom, nextDOM) {
         } else {
             parentDOM.appendChild(newDOM)
         }
-        newDOM.componentDidMount && newDOM.componentDidMount();
+        newDOM.classInstance.componentDidMount && newDOM.classInstance.componentDidMount();
     } else if (oldVdom && !newVdom) {
         let currentDOM = findDOM(oldVdom);
         if (currentDOM) {
@@ -127,7 +210,7 @@ export function compareTwoVdom(parentDOM, oldVdom, newVdom, nextDOM) {
         let newDOM = createDOM(newVdom);
         parentDOM.replaceChild(newDOM, oldDOM);
         oldVdom.classInstance && oldVdom.classInstance.componentWillUnmount && oldVdom.classInstance.componentWillUnmount();
-        newDOM.componentDidMount && newDOM.componentDidMount();
+        newDOM.classInstance.componentDidMount && newDOM.classInstance.componentDidMount();
     } else {
         updateElement(oldVdom, newVdom);
     }
@@ -179,7 +262,7 @@ function updateChild(parentDOM, oldVChildren, newVChildren) {
     }
 }
 
-function findDOM(vdom) {
+export function findDOM(vdom) {
     let { type } = vdom;
     let dom;
     if (typeof type === "function") {

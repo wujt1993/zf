@@ -1,68 +1,44 @@
-import React from './react';
-import ReactDOM from './react-dom';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-class Counter extends React.Component {
-    static defaultProps = {
-        name: 'zf'
-    }
-    constructor(props) {
-        super(props);
-        this.state = {
-            number: 0
+function App() {
+    console.log("app render")
+    let [number, setNumber] = React.useState(0);
+    React.useEffect(()=>{
+        console.log("开启一个定时器");
+        const $timer = setInterval(()=>setNumber(number => number+1), 1000)
+        return () =>{
+            console.log("销毁老的定时器");
+            clearInterval($timer);
         }
-    }
-    shouldComponentUpdate(nextProps, nextState){
-        return true
-    }
+    })
 
-    add = () => {
-        this.setState({
-            number: this.state.number + 1
-        })
-    }
-    render() {
-        return (
-            <div id={'counter-' + this.state.number}>
-                <h1>number: {this.state.number}</h1>
-                <ChildCounter count={this.state.number}></ChildCounter>
-                <button onClick={this.add}>add</button>
-            </div>
-        )
-    }
+    React.useEffect(()=>{
+        console.log("_________________________________________________________________");
+    },[])
+    return (
+        <p>{number}</p>
+    )
 }
 
-class ChildCounter extends React.Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            name: 'child',
-            number: 0
-        }
-    }
-    shouldComponentUpdate(nextProps, nextState){
-        console.log("shouldComponentUpdate")
-        return true
-    }
-
-    static getDerivedStateFromProps(nextProps, nextState) {
-        console.log('getDerivedStateFromProps')
-        if(nextProps.count === 0) return {number: 10}
-        if(nextProps.count % 2 === 0) {
-            return {
-                number: nextProps.count * 2
-            }
-        }else if(nextProps.count % 3 === 0) {
-            return {
-                number: nextProps.count * 3
-            }
-        }
-        return null
-    }
-    render() {
-        return (
-            <div >{this.state.name}: {this.state.number}</div>
-        )
-    }
-}
-let element = <Counter></Counter>
+let element = <App></App>
 ReactDOM.render(element, document.getElementById("root"))
+
+
+// function Counter() {
+//     const [number, setNumber] = React.useState(0);
+//     React.useEffect(() => {
+//         console.log('开启一个新的定时器')
+//         const $timer = setInterval(() => {
+//             setNumber(number => number + 1);
+//         }, 1000);
+//         return () => {
+//             console.log('销毁老的定时器');
+//             clearInterval($timer);
+//         }
+//     });
+//     return (
+//         <p>{number}</p>
+//     )
+// }
+// ReactDOM.render(<Counter />, document.getElementById('root'));
