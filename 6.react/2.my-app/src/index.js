@@ -1,44 +1,27 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from './react';
+import ReactDOM from './react-dom';
 
+function Child(props, childRef) {
+    const inputRef = React.createRef()
+    React.useImperativeHandle(childRef,()=>({
+        focus(){ inputRef.current.focus()}
+    }))
+    return <input ref={inputRef} />
+}
+let NewChild = React.forwardRef(Child);
 function App() {
-    console.log("app render")
-    let [number, setNumber] = React.useState(0);
-    React.useEffect(()=>{
-        console.log("开启一个定时器");
-        const $timer = setInterval(()=>setNumber(number => number+1), 1000)
-        return () =>{
-            console.log("销毁老的定时器");
-            clearInterval($timer);
-        }
-    })
-
-    React.useEffect(()=>{
-        console.log("_________________________________________________________________");
-    },[])
-    return (
-        <p>{number}</p>
+    let childRef = React.createRef();
+    const handleClick = () => {
+        childRef.current.focus();
+        // childRef.current.remove()
+    }
+    return(
+        <div>
+            <NewChild ref={childRef}></NewChild>
+            <button onClick={handleClick}>获取焦点</button>
+        </div>
     )
 }
 
 let element = <App></App>
 ReactDOM.render(element, document.getElementById("root"))
-
-
-// function Counter() {
-//     const [number, setNumber] = React.useState(0);
-//     React.useEffect(() => {
-//         console.log('开启一个新的定时器')
-//         const $timer = setInterval(() => {
-//             setNumber(number => number + 1);
-//         }, 1000);
-//         return () => {
-//             console.log('销毁老的定时器');
-//             clearInterval($timer);
-//         }
-//     });
-//     return (
-//         <p>{number}</p>
-//     )
-// }
-// ReactDOM.render(<Counter />, document.getElementById('root'));

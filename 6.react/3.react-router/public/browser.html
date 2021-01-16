@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script>
+        var historyObj = window.history;
+        //监听路径改变事件 表示将当前的状态变更了，弹出了
+        window.onpushstate = (event) => {
+            console.log(event.type, event.detail.state);
+            root.innerHTML = window.location.pathname;
+        }
+        window.addEventListener('popstate', (event) => {
+            console.log(event.type, event.state);
+            root.innerHTML = window.location.pathname;
+        });
+
+        (function (historyObj) {
+            let oldPushState = history.pushState;//缓存原生的pushState
+            historyObj.pushState = function (state, title, pathname) {
+                let result = oldPushState.apply(history, arguments);
+                if (typeof window.onpushstate === 'function') {
+                    window.onpushstate(new CustomEvent('pushstate', { detail: { pathname, state } }));
+                }
+                return result;
+            }
+        })(historyObj);
+        let oldHistoryLength = historyObj.length;
+        setTimeout(() => {
+            historyObj.pushState({ page: 1 }, { title: 'page1' }, '/page1');//page1
+            console.log(historyObj.length - oldHistoryLength);
+        }, 1000);
+        setTimeout(() => {
+            historyObj.pushState({ page: 2 }, { title: 'page2' }, '/page2');//page2
+            console.log(historyObj.length - oldHistoryLength);
+        }, 2000);
+        setTimeout(() => {
+            historyObj.pushState({ page: 3 }, { title: 'page3' }, '/page3');//page3
+            console.log(historyObj.length - oldHistoryLength);
+        }, 3000);
+        setTimeout(() => {
+            historyObj.back();//historyObj.go(-1);//page2
+            setTimeout(() => console.log(historyObj.length - oldHistoryLength), 100);
+
+        }, 4000);
+        setTimeout(() => {
+            historyObj.pushState({ page: 4 }, { title: 'page4' }, '/page4');//page4
+            console.log(historyObj.length - oldHistoryLength);
+        }, 5000);
+        setTimeout(() => {
+            historyObj.go(1);
+            console.log(historyObj.length - oldHistoryLength);//page4
+        }, 6000);
+    </script>
+</body>
+
+</html>

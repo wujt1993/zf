@@ -3,15 +3,25 @@
 
 function PrintMinNumber(numbers)
 {
-    let arr = [];
-    allSort(0, numbers, arr)
+    let len = numbers.length;
+
+    for(let i = 0; i < len - 1; i++) {
+        let flag = true
+        for(let j = 0; j < len - 1 - i; j++) {
+            if((numbers[j] + '' + numbers[j+1]) -  (numbers[j+1] + '' + numbers[j]) > 0) {
+                let temp = numbers[j];
+                numbers[j] = numbers[j+1];
+                numbers[j+1] = temp
+                flag = false;
+            }
+        }
+        if(flag) break
+    }
+    return numbers.join("")
 }
 
-function allSort(pos, numbers, arr) {
 
-    
-}
-console.log(PrintMinNumber([1,234,5]))
+console.log(PrintMinNumber([441,44, 402,41]))
 
 
 /**

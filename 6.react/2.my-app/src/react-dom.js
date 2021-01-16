@@ -12,58 +12,104 @@ function render(vdom, container) {
         compareTwoVdom(container, vdom, vdom);
     }
 }
+
+export function useImperativeHandle(ref, handler) {
+    ref.current = handler()
+}
+export function useRef(initialState) {
+    hookStates[hookIndex] =  hookStates[hookIndex] || {current: initialState}
+    return hookStates[hookIndex++]
+}
+export function useLayoutEffect(callback, deps) {
+    if(hookStates[hookIndex]) {
+        let [lastCallback, lastDeps] = hookStates[hookIndex];
+        let same = deps && deps.every((item, index) => item === lastDeps[index]);
+        if(same) {
+            hookIndex++;
+        }else {
+            lastCallback && lastCallback();
+            queueMicrotask(()=>{
+                hookStates[hookIndex] = [callback(), deps]
+            })
+        }
+    }else {
+        queueMicrotask(()=>{
+            hookStates[hookIndex] = [callback(), deps];
+        })
+        
+    }
+}
+export function useEffect(callback, deps) {
+    if (hookStates[hookIndex]) {
+        let [lastCallback, lastDeps] = hookStates[hookIndex];
+        let same = deps && deps.every((item, index) => item === lastDeps[index]);
+        if(same) {
+            hookIndex++;
+        }else {
+            lastCallback && lastCallback();
+            setTimeout(()=>{
+                hookStates[hookIndex] = [callback(), deps]
+            })
+        }
+    } else {
+        setTimeout(()=>{
+            hookStates[hookIndex] = [callback(), deps]
+        })
+        
+    }
+}
 export function useContext(context) {
     return context._currentValue
 }
-export function useMemo(factory,deps) {
-    if(hookStates[hookIndex]) {
+export function useMemo(factory, deps) {
+    if (hookStates[hookIndex]) {
         let [lastMemo, lastDeps] = hookStates[hookIndex];
-        let same = deps.every((item, index)=>{return item === lastDeps[index]});
-        if(same) {
+        let same = deps && deps.every((item, index) => { return item === lastDeps[index] });
+        if (same) {
             hookIndex++;
             return lastMemo;
-        }else {
+        } else {
             let newMemo = factory();
             hookStates[hookIndex++] = [newMemo, deps];
             return newMemo;
         }
-    }else {
+    } else {
         let newMemo = factory();
         hookStates[hookIndex++] = [newMemo, deps];
         return newMemo;
     }
 }
 
-export function useCallback(callback,deps) {
-    if(hookStates[hookIndex]) {
+export function useCallback(callback, deps) {
+    if (hookStates[hookIndex]) {
         let [lastCallback, lastDeps] = hookStates[hookIndex];
-        let same = deps.every((item, index)=>{return item === lastDeps[index]});
-        if(same) {
+        let same = deps.every((item, index) => { return item === lastDeps[index] });
+        if (same) {
             hookIndex++;
             return lastCallback;
-        }else {
+        } else {
             hookStates[hookIndex++] = [callback, deps];
             return callback;
         }
-    }else {
+    } else {
         hookStates[hookIndex++] = [callback, deps];
         return callback;
     }
 }
 
 export function useReducer(reducer, initialState) {
-    hookStates[hookIndex] = hookStates[hookIndex] || (typeof initialState === 'function' ? initialState(): initialState);
+    hookStates[hookIndex] = hookStates[hookIndex] || (typeof initialState === 'function' ? initialState() : initialState);
     let currentIndex = hookIndex;
     function dispatch(action) {
         let lastState = hookStates[currentIndex];//获取老状态
         let nextState;
-        if(typeof action=== 'function'){
-            nextState=action(lastState);
+        if (typeof action === 'function') {
+            nextState = action(lastState);
         }
-        if(reducer){
-            nextState = reducer(lastState,action);
+        if (reducer) {
+            nextState = reducer(lastState, action);
         }
-        hookStates[currentIndex]=nextState;
+        hookStates[currentIndex] = nextState;
         scheduleUpdate();//当状态改变后要重新更新应用
     }
     return [hookStates[hookIndex++], dispatch];
@@ -119,7 +165,7 @@ export function createDOM(vdom) {
         document.textContent = props.children ? props.children.toString() : '';
     }
     vdom.dom = dom;
-    if(ref) {
+    if (ref) {
         ref.current = dom;
     }
     return dom;
@@ -127,10 +173,11 @@ export function createDOM(vdom) {
 
 //处理类组件
 function mountClassComponent(vdom) {
-    let { type, props } = vdom;
+    let { type, props, ref } = vdom;
     let classInstance = new type(props);
     vdom.classInstance = classInstance;
-    if(type.contextType){
+    if(ref) classInstance.ref = ref;
+    if (type.contextType) {
         classInstance.context = type.contextType._currentValue;
     }
     classInstance.componentWillMount && classInstance.componentWillMount();
