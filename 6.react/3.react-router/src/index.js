@@ -1,21 +1,16 @@
-import React from  'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import {BrowserRouter, Route, Switch} from './react-router-dom'
-import Home from './components/Home'
-import User from './components/User'
-import Profile from './components/Profile'
+import {HashRouter as Router, Route} from './react-router-dom';
+import Home from './components/Home';
+import Profile from './components/Profile';
+import User from './components/User';
 
-function App() {
-    return (
-        <BrowserRouter>
-            <Switch>
-                <Route exact={true} path="/" component={Home}></Route>
-                <Route exact={true} path="/user" component={User}></Route>
-                <Route exact={true} path="/profile" component={Profile}></Route>
-            </Switch>
-            
-        </BrowserRouter>
-    )
-}
-let element = <App></App>
-ReactDOM.render(element, document.getElementById('root'))
+let element = (
+    <Router>
+        <Route exact={true} path="/" component={Home}></Route>
+        <Route path="/user" component={User}></Route>
+        <Route path="/profile" component={Profile}></Route>
+    </Router>
+);
+
+ReactDOM.render(element, document.getElementById("root"));
