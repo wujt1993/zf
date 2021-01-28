@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {BrowserRouter as Router, Route, Switch, Link} from './react-router-dom';
+import {BrowserRouter as Router, Route, Switch, Link, NavLink} from './react-router-dom';
 import Home from './components/Home';
 import Profile from './components/Profile';
 import User from './components/User';
@@ -11,10 +11,10 @@ let element = (
     <Router>
         <ul style={{marignBottom: '12px', borderBottom: '1px solid #ccc', paddingBottom: '12px'}}>
             <li>
-                <Link to="/">首页</Link>
+                <NavLink exact={true} to="/" activeStyle={{color:'#fff'}} className="strong" style={{textDecoration:'line-through'}}>首页</NavLink>
             </li>
             <li>
-                <Link to="/user">user</Link>
+                <NavLink to="/user">user</NavLink>
             </li>
             <li>
                 <Link to="/profile">profile</Link>
