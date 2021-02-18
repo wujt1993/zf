@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./vue.global.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <div id="root">
+        counter: {{counter}}
+        <br/>
+        <div>{{getCounter}}</div>
+        <div>{{getMessage()}}</div>
+    </div>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    counter: 0
+                }
+            },
+            computed: {
+                getCounter() {
+                    return this.counter
+                }
+            },
+            methods: {
+                getMessage() {
+                    console.log(this.counter)
+                    return 'test'
+                }
+            },
+            mounted() {
+                setInterval(()=>{
+                    this.counter++
+                },1000)
+            }
+        }).mount("#root")
+        // console.log(app.counter)
+        // console.log(app.$data.counter)
+        // app.$data.counter = 1
+    </script>
+</body>
+</html>

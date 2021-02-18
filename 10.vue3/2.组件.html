@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./vue.global.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <div id="root">
+        <div>root:{{counter}}</div>
+        <button-counter v-model:counter="counter" @update:counter="counter = $event">
+            <div>slot ~</div>
+        </button-counter>
+    </div>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    counter: 1
+                }
+            }
+        })
+        app.component("button-counter", {
+            props: ['counter'],
+            computed: {
+                model: {
+                    get() {
+                        return this.counter
+                    },
+                    set(val) {
+                        this.$emit("update:counter", val)
+                    }
+                }
+            },
+            template: `
+                <div>
+                    <h3>counter:{{model}}</h3>
+                    <button @click="this.model++">add</button>
+                    <slot></slot>
+                </div>
+            `,
+            mounted() {
+            },
+        })
+        app.mount("#root");
+    </script>
+</body>
+</html>
